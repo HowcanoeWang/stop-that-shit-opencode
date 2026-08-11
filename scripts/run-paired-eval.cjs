@@ -204,6 +204,9 @@ function main() {
     return;
   }
 
+  if (!options.codexHome) {
+    throw new Error('--codex-home or STS_EVAL_CODEX_HOME is required with --run');
+  }
   const binary = findCodexBinary();
   const evalProfile = preflightEvalHome(binary, options.codexHome);
   const runRoot = path.join(evalRoot, 'runs', plan.stamp);

@@ -5,7 +5,7 @@
 <h1 align="center">Stop That Shit</h1>
 
 <p align="center">
-  <strong>让 Codex 只做你交代的活。</strong><br>
+  <strong>别再造史了：让 Codex 只做你交代的活。</strong><br>
   <a href="#两条命令安装">安装</a> ·
   <a href="#bad-case--good-case">Bad / Good Case</a> ·
   <a href="cases/README.md">案例库</a> ·
@@ -13,9 +13,11 @@
   <a href="README.md">English</a>
 </p>
 
-你让 Codex 看一下 diff。它找出一个问题，然后调用了 `apply_patch`。
+你给 Codex 一个很小的任务，它动不动就拉起几个 subagent：这个查一遍，那个再 review 一遍，回来以后主 agent 还要重新总结一遍。它也很爱先生成一份 SHA-256 checksum，至于后面谁会用，不知道，反正先算了再说。你让它 review 一个 diff，它发现问题以后直接开始改代码。
 
-你让它比对两个 Excel。它先给每一行算 SHA-256，算完还是逐行比较。你让它修一个小 bug。它给从未发布的数据补了兼容层，拉起三个 subagent，又把全量测试跑了一遍。
+每一步都能说出一个挺严谨的理由。回头一看，要的东西还没做完，token 已经花了一截。花在正事上没意见，花在 Codex 自己加出来的活上，就很心疼。
+
+我也试过在 `AGENTS.md` 里不断补规则：「不要乱改」「别过度设计」「没让我做的先别做」。每被气到一次就补一条，写着写着，`AGENTS.md` 自己也开始造史了。Stop That Shit 把其中少量、能明确判断的边界做成 Skill 和可执行的 Guard。
 
 Stop That Shit 给 Codex 一道任务边界。默认的 Guard 由一个小 Skill 和两个 Hook 事件组成。Codex 仍然可以读仓库，也必须处理真正受影响的调用方。它碰到 Guard 能确认的越界动作时，会收到一枚红章：
 

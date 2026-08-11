@@ -13,12 +13,18 @@
   <a href="README_CN.md">中文</a>
 </p>
 
-You ask Codex to review a diff. It finds a bug and calls `apply_patch`.
+You give Codex a small task. It launches several subagents: one inspects the
+code, another reviews the result, and the main agent summarizes everything
+again. It generates a SHA-256 checksum without a consumer. You ask it to review
+a diff; after finding a bug, it starts editing.
 
-You ask it to compare two spreadsheets. It hashes every row with SHA-256, then
-still compares the rows. You ask for a small fix. It adds a compatibility layer
-for data that has never shipped, launches three subagents, and runs the full
-suite again.
+Every step comes with a careful explanation. The requested work is still not
+finished, and a noticeable part of the token budget went to work Codex invented
+for itself.
+
+Adding “do not overengineer” to `AGENTS.md` helps until the file becomes a
+history of every behavior that annoyed you. Stop That Shit turns the small,
+high-confidence part of that history into a Skill and an executable Guard.
 
 Stop That Shit gives Codex a task boundary. The default Guard combines one
 small Skill with two Hook events. Codex still reads the repository and follows

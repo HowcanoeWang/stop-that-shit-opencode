@@ -6,6 +6,10 @@
 
 <p align="center">
   <strong>让 Codex 只做你交代的活。</strong><br>
+  <a href="#两条命令安装">安装</a> ·
+  <a href="#bad-case--good-case">Bad / Good Case</a> ·
+  <a href="cases/README.md">案例库</a> ·
+  <a href="CONTRIBUTING.md">参与贡献</a> ·
   <a href="README.md">English</a>
 </p>
 
@@ -35,6 +39,22 @@ codex plugin add stop-that-shit@stop-that-shit
 ```
 
 重启 Codex。在新的 CLI TUI 中输入 `/hooks`，检查命令后信任 `UserPromptSubmit` 和 `PreToolUse`。状态说明和无 Hook 安装方式见[安装](#安装)。
+
+## Bad Case / Good Case
+
+```text
+BAD CASE
+用户   Review 这个 diff，不要修改。
+Codex  调用 apply_patch。
+STS    STOP / INTENT：Review 不等于允许修改。
+
+GOOD CASE
+用户   只修 P1 问题。
+Codex  提交一个窄补丁，运行受影响的检查。
+STS    ALLOWED：完成请求确实需要这个动作。
+```
+
+Good Case 和拦截同样重要。已经发布的数据可能需要迁移；发布流程可能真的消费校验和；共享合同变化后可能必须跑跨组件测试。用户或仓库给得出理由，这些工作就该保留。
 
 ## SHIT 是哪四种
 
@@ -114,22 +134,6 @@ Hook 必须收到受支持的事件和足够的输入才能判断。它不会看
 
 证据撑不住时，Codex 应该报告或暂缓，不要顺手实现。
 
-## Bad Case / Good Case
-
-```text
-BAD CASE
-用户   Review 这个 diff，不要修改。
-Codex  调用 apply_patch。
-STS    STOP / INTENT：Review 不等于允许修改。
-
-GOOD CASE
-用户   只修 P1 问题。
-Codex  提交一个窄补丁，运行受影响的检查。
-STS    ALLOWED：完成请求确实需要这个动作。
-```
-
-Good Case 防止插件走向另一个极端。已经发布的数据可能需要迁移；发布流程可能真的消费校验和；共享合同变化后可能必须跑跨组件测试。仓库或用户给得出理由，这些工作就该保留。
-
 ## 工作方式
 
 Skill 负责语义判断。Hook 在受支持的工具运行前检查明确事实。Codex Adapter 把宿主事件翻译成核心决策接口。
@@ -180,13 +184,19 @@ paired 命令默认只打印 72 个 cell 的计划，不会调用模型。真实
 
 ## 一起划清边界
 
-不需要会写 Hook，也不需要先做完整 benchmark。
+这个项目不靠不断增加禁令成长，而是靠成对案例推进：
+
+```text
+报告 -> 反例 -> 复现 -> 执行约束
+```
+
+只完成第一步也有价值。不需要会写 Hook，也不需要先做完整 benchmark。只有证据可复现、判断足够可靠时，规则才进入 Guard。
 
 - Codex 做了请求不需要的工作？[提交 Bad Case](https://github.com/lennney/stop-that-shit/issues/new?template=bad-case.yml)。
 - 某条规则会拦住真正必要的工作？[提交 Good Case](https://github.com/lennney/stop-that-shit/issues/new?template=good-case.yml)。
 - 有公开可复现的例子？把一组案例做成 fixture，然后提交 PR。
 
-最好让一组案例只改变一个关键事实，其余条件保持一致。Bad Case 告诉我们 Codex 应该在哪里停；Good Case 防止规则变成另一种粗暴限制。
+最好让一组案例只改变一个关键事实，其余条件保持一致。Bad Case 告诉我们 Codex 应该在哪里停；Good Case 防止规则变成另一种粗暴限制。只有可复现、高置信度的部分才进入 Guard，其余案例仍然可以改进 Skill 和案例库。
 
 提交前先看[案例库](cases/README.md)和[贡献指南](CONTRIBUTING.md)。请删掉私有代码、密钥、账号数据、完整对话和可识别身份的路径。一条小而清楚的脱敏 issue 就有价值。
 

@@ -6,6 +6,10 @@
 
 <p align="center">
   <strong>Keep Codex on the job you gave it.</strong><br>
+  <a href="#install-in-two-commands">Install</a> ·
+  <a href="#bad-case--good-case">Bad / Good Case</a> ·
+  <a href="cases/README.md">Cases</a> ·
+  <a href="CONTRIBUTING.md">Contribute</a> ·
   <a href="README_CN.md">中文</a>
 </p>
 
@@ -45,6 +49,25 @@ codex plugin add stop-that-shit@stop-that-shit
 Restart Codex. In a fresh CLI TUI, enter `/hooks` and trust
 `UserPromptSubmit` and `PreToolUse` after you inspect their commands. See
 [Install](#install) for expected status and the no-Hook option.
+
+## Bad Case / Good Case
+
+```text
+BAD CASE
+User   Review this diff. Do not edit.
+Codex  Calls apply_patch.
+STS    STOP / INTENT: review does not authorize mutation.
+
+GOOD CASE
+User   Fix the P1 finding only.
+Codex  Applies one patch and runs the affected check.
+STS    ALLOWED: the requested result needs this action.
+```
+
+The Good Case matters as much as the stop. Shipped data can require a
+migration. A release pipeline can require a checksum. A shared contract can
+require a broad test run. If the user or repository supplies the reason, that
+work stays.
 
 ## SHIT happens
 
@@ -138,25 +161,6 @@ questions:
 
 Codex reports or defers the extra work when the answers do not support it.
 
-## Bad Case / Good Case
-
-```text
-BAD CASE
-User   Review this diff. Do not edit.
-Codex  Calls apply_patch.
-STS    STOP / INTENT: review does not authorize mutation.
-
-GOOD CASE
-User   Fix the P1 finding only.
-Codex  Applies one patch and runs the affected check.
-STS    ALLOWED: the requested result needs this action.
-```
-
-The Good Case protects the project from a blunt guard. Shipped data can require
-a migration. A release pipeline can require a checksum. A shared contract can
-require a broad test run. Stop That Shit keeps those actions when the repository
-or the user supplies the reason.
-
 ## How it works
 
 The Skill guides semantic choices. The Hook enforces explicit facts before a
@@ -222,15 +226,24 @@ Live runs require a dedicated Codex home with only this plugin enabled. See
 
 ## Help define the boundary
 
-You do not need to write Hook code or build a benchmark.
+This project grows through case pairs, not through more prohibitions:
+
+```text
+report -> counterexample -> reproduction -> enforcement
+```
+
+A report can stop at the first step and still be useful. You do not need to
+write Hook code or build a benchmark. Enforcement comes last, and only when the
+evidence is reproducible and the decision is reliable.
 
 - Codex did work the request did not need? [Report a Bad Case](https://github.com/lennney/stop-that-shit/issues/new?template=bad-case.yml).
 - A guard would stop work that was actually necessary? [Report a Good Case](https://github.com/lennney/stop-that-shit/issues/new?template=good-case.yml).
 - Have a public reproduction? Turn one case pair into a fixture and open a PR.
 
 A useful pair changes one fact and keeps the rest of the task the same. The Bad
-Case tells us where Codex should have stopped. The Good Case keeps the rule from
-becoming another blunt restriction.
+Case shows where Codex crossed the boundary. The Good Case keeps the rule from
+becoming another blunt restriction. Only reproducible, high-confidence parts
+belong in the Guard; the rest can improve the Skill and case catalogue.
 
 Start with the [case catalogue](cases/README.md) and
 [contribution guide](CONTRIBUTING.md). Remove private code, secrets, account

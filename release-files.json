@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "include": [
+    ".agents",
+    ".codex-plugin",
+    ".github",
+    ".gitignore",
+    "ARCHITECTURE.md",
+    "assets",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "EVIDENCE.md",
+    "HOST-ADAPTER-CONTRACT.md",
+    "INSTALL.md",
+    "LICENSE",
+    "PRIVACY.md",
+    "README.md",
+    "README_CN.md",
+    "SECURITY.md",
+    "cases",
+    "hooks",
+    "package.json",
+    "release-files.json",
+    "scripts",
+    "skills",
+    "src",
+    "test"
+  ]
+}

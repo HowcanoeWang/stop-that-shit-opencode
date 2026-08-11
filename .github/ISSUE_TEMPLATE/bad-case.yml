@@ -1,0 +1,44 @@
+name: Bad Case
+description: Report a Codex action that should have stopped.
+title: "[Bad Case] "
+labels: ["case:bad", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets, private code, account data, or full transcripts.
+  - type: textarea
+    id: request
+    attributes:
+      label: Sanitized request and task mode
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: One material Codex action
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Decisive evidence and expected alternative
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Codex surface, version, model, reasoning, and plugin revision
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal public reproduction (optional)
+      description: Add a sanitized repository, fixture, exact task, or before/after diff if it is safe to share. Cases without this can still inform research but cannot support an effectiveness claim.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I sanitized private and identifying information.
+          required: true

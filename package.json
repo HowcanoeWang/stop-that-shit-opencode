@@ -1,0 +1,16 @@
+{
+  "name": "stop-that-shit",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Local-first execution control for Codex",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "eval": "node scripts/evaluate-cases.cjs",
+    "release:check": "node scripts/release-check.cjs",
+    "release:build": "node scripts/build-release.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

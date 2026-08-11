@@ -1,0 +1,196 @@
+<p align="center">
+  <img src="assets/stop-stamp.svg" alt="A red STOP audit stamp" width="240">
+</p>
+
+<h1 align="center">Stop That Shit</h1>
+
+<p align="center">
+  <strong>Keep Codex on the job you gave it.</strong><br>
+  <a href="README_CN.md">中文</a>
+</p>
+
+You ask Codex to review a diff. It finds a bug and calls `apply_patch`.
+
+You ask it to compare two spreadsheets. It hashes every row with SHA-256, then
+still compares the rows. You ask for a small fix. It adds a compatibility layer
+for data that has never shipped, launches three subagents, and runs the full
+suite again.
+
+Stop That Shit gives the task an explicit mode and a few hard boundaries. Codex
+still reads the repository and follows necessary consequences. When it crosses
+a boundary that the Hook can prove, it gets a red stamp:
+
+```text
+STOP / INTENT
+Review does not authorize mutation.
+```
+
+Version `0.0.1` is a technical preview. LLM runs vary, and Hooks see only part
+of a Codex run. The plugin can reduce some unwanted work. It cannot guarantee
+how the model will behave.
+
+## SHIT happens
+
+The name labels four ways a bounded task gets away from you:
+
+| | Failure | A familiar shape |
+| --- | --- | --- |
+| **S** | Scope creep | One fix turns into a refactor. |
+| **H** | Hashing and hypothetical hardening | Codex adds digests or defenses with no current job. |
+| **I** | Intent violation | A review or question turns into an edit. |
+| **T** | Task thrashing | Codex rereads, retests, or re-reviews settled work. |
+
+The plugin does not count lines or reward smaller diffs. It asks whether each
+extra action is requested or required by reachable code, data, and acceptance
+criteria.
+
+The pain tends to look reasonable one decision at a time:
+
+- checksum files that no command reads;
+- guards for inputs that no supported path can produce;
+- a rubric or audit loop where the task needs an engineering decision;
+- feature flags, migration frameworks, and wrappers for a future no one asked for;
+- one more guard whose only reason is to protect the previous guard.
+
+Each piece has an explanation. Together they can leave a tiny feature buried
+under hundreds of lines of defensive code.
+
+## Why hash has a hard default
+
+Hashing is concrete enough for the Hook to recognize on covered tool paths. It
+also has a clean question: does the digest save real work and change the next
+action?
+
+We use the test documented by
+[HERO](https://github.com/wanshuiyin/HERO-Anti-OverDefense): the digest must
+replace a costlier operation, and its result must control what happens next.
+
+```text
+STOP
+Hash every row, then compare every row anyway.
+
+ALLOW
+Use a digest to skip rereading an unchanged large file.
+```
+
+`0.0.1` denies a recognized new hash operation by default. Use `hash=allow`
+when the user or the repository supplies the missing job. The Hook does not try
+to infer that job from code it has not seen.
+
+## Use it
+
+Most tasks need one line:
+
+```text
+$stop-that-shit change -- Fix the failing config test.
+$stop-that-shit review -- Review this diff. Report findings; do not edit.
+```
+
+Add a boundary when you know it in advance:
+
+```text
+$stop-that-shit lock change files=src/config.cjs|test/config.test.cjs -- Fix this behavior.
+$stop-that-shit change deps=allow -- Add the requested parser dependency.
+$stop-that-shit change hash=allow -- Generate the requested release checksum.
+$stop-that-shit change agents=1 -- Use one independent test shard.
+```
+
+Skip `files=` when you do not know every affected file. Codex should inspect the
+real call path and update the callers, fixtures, or tests needed to finish the
+request.
+
+## What the Hook stops
+
+| Codex action on a covered path | Default | You can allow it with |
+| --- | --- | --- |
+| Write during `review`, `answer`, or `monitor` | Stop | Switch to `change` |
+| Add a dependency | Ask | `deps=allow` |
+| Launch a subagent | Stop above budget | `agents=N` |
+| Add a recognized hash operation | Stop | `hash=allow` |
+| Write outside a file lock | Stop | Expand `files=` |
+
+The Hook needs a supported event and enough input to make the decision. It does
+not infer whether a cache, retry, abstraction, migration, compatibility layer,
+or new file belongs in your project. The Skill handles those choices with four
+questions:
+
+1. Did the user ask for it?
+2. Does the requested result need it?
+3. What reachable evidence shows that need?
+4. Would the current acceptance fail without it?
+
+Codex reports or defers the extra work when the answers do not support it.
+
+## Bad Case / Good Case
+
+```text
+BAD CASE
+User   Review this diff. Do not edit.
+Codex  Calls apply_patch.
+STS    STOP / INTENT: review does not authorize mutation.
+
+GOOD CASE
+User   Fix the P1 finding only.
+Codex  Applies one patch and runs the affected check.
+STS    ALLOWED: the requested result needs this action.
+```
+
+The Good Case protects the project from a blunt guard. Shipped data can require
+a migration. A release pipeline can require a checksum. A shared contract can
+require a broad test run. Stop That Shit keeps those actions when the repository
+or the user supplies the reason.
+
+## How it is put together
+
+The Skill guides semantic choices. The Hook enforces explicit facts before a
+supported tool runs. A small host Adapter translates Codex events into the core
+decision interface.
+
+Codex is the only implemented Adapter in `0.0.1`. Another harness can use the
+same core when it provides an equivalent before-action event. See
+[HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md).
+
+## Limits and evidence
+
+Specialized tool paths can bypass normal Hooks. The plugin does not judge code
+quality, repair Codex runtime bugs, or act as a security sandbox.
+
+The test suite proves policy behavior on covered events. It does not prove a
+general improvement in model behavior. [EVIDENCE.md](EVIDENCE.md) records the
+tests, live runs, null results, and exclusions.
+
+## Install
+
+The preview supports Codex desktop and CLI installations with plugin and Hook
+support. It requires Node.js 18 or newer.
+
+Follow [INSTALL.md](INSTALL.md). Read the Hook source before you trust it. Then
+check the package:
+
+```bash
+codex plugin marketplace add lennney/stop-that-shit
+codex plugin add stop-that-shit@stop-that-shit
+```
+
+Restart Codex, review the commands under `/hooks`, and run:
+
+```powershell
+npm test
+npm run eval
+npm run release:check
+```
+
+## Bring a case
+
+Open a **Bad Case** when Codex did work that the request did not need. Open a
+**Good Case** when an action looked excessive but had a real consumer or failure
+behind it. A useful pair changes one fact and keeps the rest of the task the
+same.
+
+Read the [case catalogue](cases/README.md) and
+[contribution guide](CONTRIBUTING.md). Remove private code, secrets, account
+data, full transcripts, and identifying paths before you post.
+
+## License
+
+[MIT](LICENSE)

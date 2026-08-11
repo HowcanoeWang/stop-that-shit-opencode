@@ -1,0 +1,105 @@
+# Contributing to Stop That Shit
+
+Stop That Shit is built from real Codex behavior, paired counterexamples, and
+small verifiable controls. You do not need to write Hook code to contribute.
+
+## Fastest ways to help
+
+1. Submit a **Bad Case** where Codex left the authorized task.
+2. Submit a **Good Case** where a seemingly extra action was actually necessary.
+3. Pair an existing case labeled `needs-good-case` or `needs-bad-case`.
+4. Turn a sanitized case into a reproducible fixture.
+5. Improve a classifier, Hook, test, installer, or explanation.
+6. Re-run the paired evaluation on another supported Codex version or model.
+
+## Evidence levels
+
+| Level | Required evidence |
+| --- | --- |
+| `report` | Sanitized request, action, expected decision, and reason |
+| `trace` | Starting state, decisive evidence, and relevant action sequence |
+| `repro` | Pinned public repository or minimal fixture with repeat steps |
+| `paired-eval` | Isolated baseline/plugin runs plus executable completion and counterexample checks |
+
+Reports are welcome. They do not need to arrive as perfect evals.
+
+## Case contribution rules
+
+- Describe one material action per case.
+- Use S, H, I, or T only when the decisive evidence fits that family.
+- Give the expected decision and the proportionate next action.
+- Include the nearest counterexample, or mark the case as needing one.
+- Prefer a minimal contrast: one changed fact should reverse the verdict.
+- Do not infer model training motives from behavior.
+- Do not use LOC, file count, token count, or elapsed time as the verdict by
+  itself. Those are signals, not task authorization.
+- Sanitize private material before posting.
+
+Use [`cases/_template.md`](cases/_template.md) for a catalogue PR. A GitHub issue
+is enough for an initial report.
+
+## Suggested labels
+
+- `case:bad`, `case:good`;
+- `family:S`, `family:H`, `family:I`, `family:T`;
+- `needs-good-case`, `needs-bad-case`;
+- `evidence:report`, `evidence:trace`, `evidence:repro`, `evidence:paired-eval`;
+- `good-first-case`, `good-first-code`;
+- `privacy-review`, `needs-triage`.
+
+## Code changes are case-first
+
+A policy or Hook PR must name the case it changes.
+
+Passing means:
+
+1. the Bad Case is blocked, deferred, or escalated as expected;
+2. the paired Good Case still proceeds;
+3. the requested result still completes;
+4. no new repetition or continuation loop appears;
+5. the intervention explains its SHIT family, evidence, and next step.
+
+One concern per PR. A classifier change, installer refactor, and README rewrite
+belong in separate contributions.
+
+## Evaluation claims
+
+Any public effectiveness claim must state:
+
+- repository and immutable revision;
+- Codex surface and version;
+- model and reasoning setting;
+- permissions and enabled plugins;
+- exact baseline and Stop That Shit configuration;
+- run count, failures, and exclusions;
+- task-completion and Good Case results, not only prevented actions;
+- negative and null results.
+
+Never turn one successful trace into a universal percentage.
+
+## Community loop
+
+Maintainers should publish a regular case roundup containing:
+
+- newly accepted Bad Cases;
+- newly accepted Good Cases;
+- unpaired cases where help is wanted;
+- cases promoted to reproducible evals;
+- policies changed or rejected because of counterexamples;
+- supported Codex versions actually tested.
+
+Contributors choose anonymous or credited publication. Useful reports receive
+the same credit as code. Finding the Good Case that prevents a bad rule is a
+first-class contribution.
+
+## What not to submit
+
+- raw secrets, authentication data, proprietary code, or full private sessions;
+- complaints without a recognizable action and expected alternative;
+- style disputes presented as authorization failures;
+- rules that stop legitimate security, migration, accessibility, or regression
+  work merely because it is large;
+- claims that Stop That Shit fixes Codex runtime bugs it can only mitigate.
+
+Bring the trace. Bring the counterexample. Help Codex stop the right shit.
+

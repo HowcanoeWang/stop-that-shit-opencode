@@ -168,10 +168,10 @@ codex plugin add stop-that-shit@stop-that-shit
 不想启用命令 Hook 时，让 Codex 内置的 Skill Installer 只安装 Skill：
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
 ```
 
-新开任务后调用 `$stop-that-shit`。这条路径不需要 Hook 信任，但不能机器拦截越界动作。
+新开任务后调用 `$stop-that-shit`。这条路径不需要 Hook 信任，但不能机器拦截越界动作，也不会改变 Codex 原有的 sandbox 和 approval 设置。
 
 完整的 Skill 与 Guard 安装说明见 [INSTALL.md](INSTALL.md)。然后运行本地检查：
 

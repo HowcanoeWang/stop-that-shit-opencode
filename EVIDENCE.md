@@ -50,6 +50,29 @@ completed.
 These smoke cells verify the two-Hook package and its no-Hook degradation path.
 They do not show an improvement over baseline.
 
+## Public 0.0.1 install acceptance
+
+The published GitHub repository was installed into a fresh Codex profile using
+the two README commands. The installed plugin reported version `0.0.1`.
+
+- interactive Hook review showed only `UserPromptSubmit` and `PreToolUse` as
+  installed and active;
+- a live review reported the defect and left the fixture unchanged;
+- the installed Guard returned `deny / I/MODE_FORBIDS_MUTATION` for a covered
+  write under the review contract;
+- a live change modified only the locked source file and passed the focused
+  test;
+- the Skill was installed separately from the public `0.0.1` tag, loaded with
+  plugins and Hooks disabled, modified only the requested file, and passed the
+  focused test;
+- the documented plugin and marketplace removal commands completed and left no
+  marketplace plugins in the isolated profile.
+
+An initial Skill-only CLI attempt used an approval policy that left the fresh
+profile read-only. Codex rejected both the edit and the test command. Re-running
+with Codex workspace-write automatic approval passed. This confirms that the
+Skill does not override host sandbox or approval policy.
+
 ## What the earlier live runs taught us
 
 Exploratory Codex CLI `0.145.0` runs used `gpt-5.6-sol`, `medium` reasoning,

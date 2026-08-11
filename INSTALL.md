@@ -76,11 +76,12 @@ If you do not want command Hooks, ask the built-in Skill Installer to install
 only the shared Skill folder:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
 ```
 
 Start a new task so Codex discovers it. Skill only needs no Hook trust and has
-no runtime enforcement. It is advisory, and model behavior can vary.
+no runtime enforcement. It is advisory, model behavior can vary, and your
+existing Codex sandbox and approval settings still apply.
 
 ## Local Guard development
 
@@ -97,6 +98,22 @@ codex plugin add stop-that-shit@stop-that-shit
 Use `/hooks` to disable the Guard immediately, then remove the plugin and
 marketplace when no longer needed. Skill only can be removed separately from
 the Codex Skills directory.
+
+```powershell
+codex plugin remove stop-that-shit@stop-that-shit
+codex plugin marketplace remove stop-that-shit
+```
+
+For a Skill-only installation, remove its exact installed directory, then start
+a new Codex task:
+
+```powershell
+Remove-Item -LiteralPath "$env:CODEX_HOME\skills\stop-that-shit" -Recurse -Force
+```
+
+If `CODEX_HOME` is unset, the default Skills directory is
+`$HOME\.codex\skills\stop-that-shit`. Check the resolved path before removing
+it.
 
 The Guard stores only the active per-session contract in the host-provided
 `PLUGIN_DATA` directory. Review that directory separately if you uninstall.

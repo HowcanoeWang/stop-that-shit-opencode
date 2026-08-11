@@ -14,6 +14,22 @@ unnecessary or necessary action, and the reason it should be stopped or kept.
 5. Improve a classifier, Hook, test, installer, or explanation.
 6. Re-run the paired evaluation on another supported Codex version or model.
 
+## Where a change belongs
+
+| If you want to change | Start here |
+| --- | --- |
+| Agent guidance or the Stop Ladder | `skills/stop-that-shit/SKILL.md` |
+| Hook discovery and lifecycle events | `hooks/` |
+| Task contracts and decisions | `src/` |
+| Codex event translation | `src/adapters/` |
+| A Bad Case or Good Case | `cases/0.0.1/` |
+| Reproducible model evaluation | `evals/codex-paired/` |
+| Regression coverage | `test/` |
+
+User-facing setup belongs in `README.md`, `README_CN.md`, or `INSTALL.md`.
+Keep raw sessions, private repositories, and launch material out of this
+repository.
+
 ## Evidence levels
 
 | Level | Required evidence |
@@ -40,14 +56,15 @@ Reports are welcome. They do not need to arrive as perfect evals.
 Use [`cases/_template.md`](cases/_template.md) for a catalogue PR. A GitHub issue
 is enough for an initial report.
 
-## Suggested labels
+## Case labels
 
-- `case:bad`, `case:good`;
-- `family:S`, `family:H`, `family:I`, `family:T`;
-- `needs-good-case`, `needs-bad-case`;
-- `evidence:report`, `evidence:trace`, `evidence:repro`, `evidence:paired-eval`;
-- `good-first-case`, `good-first-code`;
-- `privacy-review`, `needs-triage`.
+- `case:bad` — Codex crossed the requested boundary;
+- `case:good` — the action was necessary and must remain allowed;
+- `needs-counterexample` — the case still needs its nearest opposite;
+- `good first issue` — a small contribution with enough context to start.
+
+Keep evidence level and SHIT family in the issue body until the case is clear.
+The project does not need a label for every field.
 
 ## Code changes are case-first
 

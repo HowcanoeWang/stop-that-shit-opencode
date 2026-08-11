@@ -1,7 +1,7 @@
 name: Bad Case
 description: Report a Codex action that should have stopped.
 title: "[Bad Case] "
-labels: ["case:bad", "needs-triage"]
+labels: ["case:bad"]
 body:
   - type: markdown
     attributes:

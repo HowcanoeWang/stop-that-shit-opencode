@@ -210,11 +210,12 @@ message, use the CLI TUI for this review, then restart Desktop.
 If you do not want command Hooks, install only the advisory Skill:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
 ```
 
 Start a new task, then invoke `$stop-that-shit`. This path needs no Hook trust,
-but it cannot enforce a task boundary.
+but it cannot enforce a task boundary or change your Codex sandbox and approval
+settings.
 
 See [INSTALL.md](INSTALL.md) for the complete Skill and Guard paths. Run the
 local checks:

@@ -1,7 +1,7 @@
 name: Good Case
 description: Report necessary work that a guard must allow.
 title: "[Good Case] "
-labels: ["case:good", "needs-triage"]
+labels: ["case:good"]
 body:
   - type: markdown
     attributes:

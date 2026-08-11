@@ -16,9 +16,10 @@ still compares the rows. You ask for a small fix. It adds a compatibility layer
 for data that has never shipped, launches three subagents, and runs the full
 suite again.
 
-Stop That Shit gives the task an explicit mode and a few hard boundaries. Codex
-still reads the repository and follows necessary consequences. When it crosses
-a boundary that the Hook can prove, it gets a red stamp:
+Stop That Shit gives Codex a task boundary. The default Guard combines one
+small Skill with two Hook events. Codex still reads the repository and follows
+necessary consequences. When it crosses a boundary that the Guard can prove,
+it gets a red stamp:
 
 ```text
 STOP / INTENT
@@ -26,8 +27,24 @@ Review does not authorize mutation.
 ```
 
 Version `0.0.1` is a technical preview. LLM runs vary, and Hooks see only part
-of a Codex run. The plugin can reduce some unwanted work. It cannot guarantee
-how the model will behave.
+of a Codex run. The Skill and Guard can reduce some unwanted work. Neither can
+guarantee how the model will behave.
+
+| Start with | What it adds | Friction |
+| --- | --- | --- |
+| **Skill + Guard** | Stop Ladder plus machine-enforced boundaries | Default; trust two Hooks |
+| **Skill only** | The Stop Ladder and task-mode guidance | Optional; no enforcement |
+
+## Install in two commands
+
+```bash
+codex plugin marketplace add lennney/stop-that-shit
+codex plugin add stop-that-shit@stop-that-shit
+```
+
+Restart Codex. In a fresh CLI TUI, enter `/hooks` and trust
+`UserPromptSubmit` and `PreToolUse` after you inspect their commands. See
+[Install](#install) for expected status and the no-Hook option.
 
 ## SHIT happens
 
@@ -55,7 +72,7 @@ The pain tends to look reasonable one decision at a time:
 Each piece has an explanation. Together they can leave a tiny feature buried
 under hundreds of lines of defensive code.
 
-## Why hash has a hard default
+## Why hashing is blocked by default
 
 Hashing is concrete enough for the Hook to recognize on covered tool paths. It
 also has a clean question: does the digest save real work and change the next
@@ -99,7 +116,7 @@ Skip `files=` when you do not know every affected file. Codex should inspect the
 real call path and update the callers, fixtures, or tests needed to finish the
 request.
 
-## What the Hook stops
+## What the Guard stops
 
 | Codex action on a covered path | Default | You can allow it with |
 | --- | --- | --- |
@@ -140,7 +157,7 @@ a migration. A release pipeline can require a checksum. A shared contract can
 require a broad test run. Stop That Shit keeps those actions when the repository
 or the user supplies the reason.
 
-## How it is put together
+## How it works
 
 The Skill guides semantic choices. The Hook enforces explicit facts before a
 supported tool runs. A small host Adapter translates Codex events into the core
@@ -161,35 +178,64 @@ tests, live runs, null results, and exclusions.
 
 ## Install
 
-The preview supports Codex desktop and CLI installations with plugin and Hook
-support. It requires Node.js 18 or newer.
+### Default: install the Guard
 
-Follow [INSTALL.md](INSTALL.md). Read the Hook source before you trust it. Then
-check the package:
+The Guard supports Codex desktop and CLI installations with Plugin and Hook
+support. It requires Node.js 18 or newer. Read the Hook source before trusting
+it, then install:
 
 ```bash
 codex plugin marketplace add lennney/stop-that-shit
 codex plugin add stop-that-shit@stop-that-shit
 ```
 
-Restart Codex, review the commands under `/hooks`, and run:
+Restart Codex. Open a fresh Codex CLI TUI, enter `/hooks`, and review the two
+Stop That Shit handlers. A trusted installation shows `Active 1 / Review 0` for
+`UserPromptSubmit` and `PreToolUse`. `Stop 0` is expected because the plugin
+does not install a Stop handler. If Codex Desktop sends `/hooks` as a normal
+message, use the CLI TUI for this review, then restart Desktop.
+
+### Optional: Skill only
+
+If you do not want command Hooks, install only the advisory Skill:
+
+```text
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+```
+
+Start a new task, then invoke `$stop-that-shit`. This path needs no Hook trust,
+but it cannot enforce a task boundary.
+
+See [INSTALL.md](INSTALL.md) for the complete Skill and Guard paths. Run the
+local checks:
 
 ```powershell
 npm test
 npm run eval
+npm run eval:paired -- --dry-run
 npm run release:check
 ```
 
-## Bring a case
+The paired command prints a 72-cell plan and starts no model runs by default.
+Live runs require a dedicated Codex home with only this plugin enabled. See
+[the paired Codex eval](evals/codex-paired/README.md) before using `--run`.
 
-Open a **Bad Case** when Codex did work that the request did not need. Open a
-**Good Case** when an action looked excessive but had a real consumer or failure
-behind it. A useful pair changes one fact and keeps the rest of the task the
-same.
+## Help define the boundary
 
-Read the [case catalogue](cases/README.md) and
+You do not need to write Hook code or build a benchmark.
+
+- Codex did work the request did not need? [Report a Bad Case](https://github.com/lennney/stop-that-shit/issues/new?template=bad-case.yml).
+- A guard would stop work that was actually necessary? [Report a Good Case](https://github.com/lennney/stop-that-shit/issues/new?template=good-case.yml).
+- Have a public reproduction? Turn one case pair into a fixture and open a PR.
+
+A useful pair changes one fact and keeps the rest of the task the same. The Bad
+Case tells us where Codex should have stopped. The Good Case keeps the rule from
+becoming another blunt restriction.
+
+Start with the [case catalogue](cases/README.md) and
 [contribution guide](CONTRIBUTING.md). Remove private code, secrets, account
-data, full transcripts, and identifying paths before you post.
+data, full transcripts, and identifying paths before you post. A small,
+sanitized issue is enough.
 
 ## License
 

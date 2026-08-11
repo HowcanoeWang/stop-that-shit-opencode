@@ -1,28 +1,54 @@
 # Evidence
 
 Version: 0.0.1 pre-release  
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Current minimal candidate
 
 Verified locally:
 
 - plugin and Skill validators pass;
-- 49/49 automated tests pass;
+- 62/62 automated tests pass;
 - 14/14 executable Bad/Good case arms pass;
 - packaged Hook input/output works on Windows;
 - review blocks covered writes and explicit change preserves the Good Case;
 - optional file locks handle repository-relative and absolute patch paths;
 - dependency authority, subagent budget, and high-confidence hash authority have
   paired allow/stop coverage;
-- release allowlist excludes internal research, live fixtures, and references.
+- release allowlist excludes internal research, captured live runs, and private
+  references.
 - a fresh minimal live Codex smoke run kept `review` read-only and completed the
   paired one-line `change` with 1/1 focused test.
+- Codex CLI `0.147.0` loaded the current two-event manifest in an isolated
+  profile. The TUI reported one installed and active handler for
+  `UserPromptSubmit` and `PreToolUse`, with zero handlers for every other event.
+- the public paired-eval harness produces a fixed baseline/instruction/plugin
+  plan over four Bad/Good families. The default command is dry-run only.
 
-The runtime stores only active contract fields and subscribes to four Hook
-lifecycle points. It no longer performs action fingerprinting, compaction
-checkpointing, automatic scope discovery, or semantic compatibility/new-file
-guessing.
+The current runtime stores only active contract fields and registers two Hook
+events: `UserPromptSubmit` and `PreToolUse`. It no longer performs action
+fingerprinting, compaction checkpointing, automatic scope discovery, or semantic
+compatibility/new-file guessing.
+
+## Exact two-Hook candidate smoke
+
+The installed candidate's `hooks.json` matched the working tree and contained
+only `UserPromptSubmit` and `PreToolUse`.
+
+Three fresh, single-seed smoke cells were run on disposable Git fixtures:
+
+- Guard review: reported the defect and left the file unchanged;
+- Guard change: changed only the requested file and passed the focused test;
+- Skill with Hooks disabled: loaded the same Skill, changed only the requested
+  file, and passed the focused test.
+
+One Guard change process failed before a model session started while the local
+Codex CLI was being updated. It is an infrastructure failure, not a product
+result. The failed cell was retained locally and rerun after the CLI install
+completed.
+
+These smoke cells verify the two-Hook package and its no-Hook degradation path.
+They do not show an improvement over baseline.
 
 ## What the earlier live runs taught us
 
@@ -50,10 +76,13 @@ does not require a large benchmark to make a probabilistic mitigation claim.
 
 - a multi-scenario live baseline/plugin matrix for the reduced candidate;
 - installation from a public immutable Git revision;
-- interactive `/hooks` trust on a clean machine;
+- interactive `/hooks` trust on a separate physical machine;
 - macOS and Linux behavior;
 - several distinct community scenarios and multiple seeds;
 - specialized tool paths that may bypass normal Hook coverage.
+
+The paired-eval harness is available, but its 72-session default matrix has not
+been run or published. A generated plan is not effectiveness evidence.
 
 ## HERO-derived round 1
 

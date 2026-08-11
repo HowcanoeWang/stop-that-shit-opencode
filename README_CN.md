@@ -13,14 +13,28 @@
 
 你让它比对两个 Excel。它先给每一行算 SHA-256，算完还是逐行比较。你让它修一个小 bug。它给从未发布的数据补了兼容层，拉起三个 subagent，又把全量测试跑了一遍。
 
-Stop That Shit 给当前任务写明模式和几条硬边界。Codex 仍然可以读仓库，也必须处理真正受影响的调用方。它碰到 Hook 能确认的越界动作时，会收到一枚红章：
+Stop That Shit 给 Codex 一道任务边界。默认的 Guard 由一个小 Skill 和两个 Hook 事件组成。Codex 仍然可以读仓库，也必须处理真正受影响的调用方。它碰到 Guard 能确认的越界动作时，会收到一枚红章：
 
 ```text
 STOP / INTENT
 Review 不等于允许修改。
 ```
 
-`0.0.1` 是技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。这个插件可以减少一部分越界多做，不能保证模型每次都听话。
+`0.0.1` 是技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界多做，但都不能保证模型每次听话。
+
+| 从哪里开始 | 提供什么 | 使用成本 |
+| --- | --- | --- |
+| **Skill + Guard** | 同一份 Skill，加上机器可执行边界 | 默认；检查并信任两个 Hook |
+| **只装 Skill** | Stop Ladder 和任务模式引导 | 可选；没有执行拦截 |
+
+## 两条命令安装
+
+```bash
+codex plugin marketplace add lennney/stop-that-shit
+codex plugin add stop-that-shit@stop-that-shit
+```
+
+重启 Codex。在新的 CLI TUI 中输入 `/hooks`，检查命令后信任 `UserPromptSubmit` 和 `PreToolUse`。状态说明和无 Hook 安装方式见[安装](#安装)。
 
 ## SHIT 是哪四种
 
@@ -45,7 +59,7 @@ Review 不等于允许修改。
 
 每一步都像在增加“严谨性”。最后，一个几行代码能完成的功能，被几百行防御代码埋住了。
 
-## 为什么 hash 单独设一道默认闸门
+## 为什么默认阻止 hash
 
 在 covered tool path 上，Hook 可以较高置信度地识别 hash 动作。它也有一个很具体的判断题：摘要有没有省掉真实工作，结果会不会改变下一步？
 
@@ -81,7 +95,7 @@ $stop-that-shit change agents=1 -- 使用一个独立测试 subagent。
 
 不知道全部受影响文件时，不要硬写 `files=`。让 Codex 沿真实调用链检查，把完成任务必需的 caller、fixture 和测试一起改完。
 
-## Hook 现在能拦什么
+## Guard 现在能拦什么
 
 | covered path 上的动作 | 默认处理 | 怎么放行 |
 | --- | --- | --- |
@@ -116,7 +130,7 @@ STS    ALLOWED：完成请求确实需要这个动作。
 
 Good Case 防止插件走向另一个极端。已经发布的数据可能需要迁移；发布流程可能真的消费校验和；共享合同变化后可能必须跑跨组件测试。仓库或用户给得出理由，这些工作就该保留。
 
-## 它怎么工作
+## 工作方式
 
 Skill 负责语义判断。Hook 在受支持的工具运行前检查明确事实。Codex Adapter 把宿主事件翻译成核心决策接口。
 
@@ -130,28 +144,51 @@ Skill 负责语义判断。Hook 在受支持的工具运行前检查明确事实
 
 ## 安装
 
-预览版面向支持 Plugin 和 Hook 的 Codex desktop 与 CLI，需要 Node.js 18 或更高版本。
+### 默认安装：Guard
 
-按照 [INSTALL.md](INSTALL.md) 安装。信任 Hook 前先读源码，然后检查包：
+Guard 面向支持 Plugin 和 Hook 的 Codex desktop 与 CLI，需要 Node.js 18 或更高版本。
+
+信任 Hook 前先读源码，然后安装插件：
 
 ```bash
 codex plugin marketplace add lennney/stop-that-shit
 codex plugin add stop-that-shit@stop-that-shit
 ```
 
-重启 Codex，在 `/hooks` 中检查命令并确认信任，然后运行：
+重启 Codex。新开一个 Codex CLI TUI，输入 `/hooks`，检查 Stop That Shit 的两个 Hook。完成信任后，`UserPromptSubmit` 和 `PreToolUse` 应显示 `Active 1 / Review 0`。`Stop 0` 是正常结果，因为插件没有注册 Stop Hook。如果 Desktop 把 `/hooks` 当成普通消息，请在 CLI TUI 中完成检查和信任，再重启 Desktop。
+
+### 可选安装：只装 Skill
+
+不想启用命令 Hook 时，让 Codex 内置的 Skill Installer 只安装 Skill：
+
+```text
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+```
+
+新开任务后调用 `$stop-that-shit`。这条路径不需要 Hook 信任，但不能机器拦截越界动作。
+
+完整的 Skill 与 Guard 安装说明见 [INSTALL.md](INSTALL.md)。然后运行本地检查：
 
 ```powershell
 npm test
 npm run eval
+npm run eval:paired -- --dry-run
 npm run release:check
 ```
 
-## 带一个案例来
+paired 命令默认只打印 72 个 cell 的计划，不会调用模型。真实运行必须使用只启用本插件的独立 Codex home。使用 `--run` 前，请先阅读[真实 Codex 对照测试说明](evals/codex-paired/README.md)。
 
-Codex 做了请求不需要的工作，请提交 **Bad Case**。一个动作看着多余，但背后有真实消费者或故障，请提交 **Good Case**。最好让一组案例只改变一个关键事实，其余条件保持一致。
+## 一起划清边界
 
-提交前先看[案例库](cases/README.md)和[贡献指南](CONTRIBUTING.md)。请删掉私有代码、密钥、账号数据、完整对话和可识别身份的路径。
+不需要会写 Hook，也不需要先做完整 benchmark。
+
+- Codex 做了请求不需要的工作？[提交 Bad Case](https://github.com/lennney/stop-that-shit/issues/new?template=bad-case.yml)。
+- 某条规则会拦住真正必要的工作？[提交 Good Case](https://github.com/lennney/stop-that-shit/issues/new?template=good-case.yml)。
+- 有公开可复现的例子？把一组案例做成 fixture，然后提交 PR。
+
+最好让一组案例只改变一个关键事实，其余条件保持一致。Bad Case 告诉我们 Codex 应该在哪里停；Good Case 防止规则变成另一种粗暴限制。
+
+提交前先看[案例库](cases/README.md)和[贡献指南](CONTRIBUTING.md)。请删掉私有代码、密钥、账号数据、完整对话和可识别身份的路径。一条小而清楚的脱敏 issue 就有价值。
 
 ## License
 

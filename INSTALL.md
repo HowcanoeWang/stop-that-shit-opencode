@@ -1,11 +1,12 @@
 # Install Stop That Shit 0.0.1
 
-This pre-release is installed from a local Codex plugin marketplace. It requires
-Node.js 18 or newer because every Hook command runs the bundled CommonJS entrypoint.
+The default installation is the Guard: one Skill plus two Hook events. Install
+Skill only when you prefer advisory guidance without runtime enforcement.
 
-## 1. Install from GitHub
+## Default: Skill + Guard
 
-Add the repository as a Codex marketplace, then install the plugin:
+The Guard requires Node.js 18 or newer. Add the repository as a Codex
+marketplace, then install the plugin:
 
 ```powershell
 codex plugin marketplace add lennney/stop-that-shit
@@ -14,17 +15,15 @@ codex plugin add stop-that-shit@stop-that-shit
 
 Restart Codex after installation.
 
-## 2. Verify the source
+### Verify the source
 
-Clone or inspect the public repository before trusting its Hooks.
-
-Before installation, inspect these executable surfaces:
+Inspect these executable surfaces before trusting them:
 
 - `hooks/hooks.json`
 - `hooks/stop-that-shit.cjs`
 - `src/`
 
-Run the local checks from the plugin root:
+From a local checkout, run:
 
 ```powershell
 npm test
@@ -32,62 +31,72 @@ npm run eval
 npm run release:check
 ```
 
-## 3. Local development install
+### Review two Hooks
 
-The supported authoring path is the built-in Plugin Creator. In Codex, ask it
-to wire the current plugin folder into a local marketplace:
+Start a fresh Codex CLI TUI and enter `/hooks`. Inspect each Stop That Shit
+command and trust it only if it matches the source you reviewed.
 
-```text
-$plugin-creator Add this existing Stop That Shit plugin folder to a local marketplace for testing. Do not change its source files.
-```
+Only two events are required:
 
-The repository includes `.agents/plugins/marketplace.json`. Add a local checkout
-with:
+- `UserPromptSubmit` reads the task mode and explicit boundaries;
+- `PreToolUse` checks a supported action before it runs.
 
-```text
-codex plugin marketplace add <local-checkout-root>
-codex plugin add stop-that-shit@stop-that-shit
-```
+After review, both rows show `Installed 1 / Active 1 / Review 0`. `Stop 0` is
+expected; the plugin does not install a Stop handler.
 
-Restart the desktop app, open the Plugins Directory, select that marketplace,
-and install Stop That Shit.
+Some Codex Desktop builds send `/hooks` as an ordinary message. In that case,
+complete the review in the CLI TUI and restart Desktop. Codex records trust
+against the Hook definition hash, so an update may require another review. Do
+not bypass Hook trust for ordinary installation.
 
-## 4. Review and trust Hooks
+### Run a smoke test
 
-Installation does not trust command Hooks automatically. Start a fresh Codex
-session, open `/hooks`, inspect every Stop That Shit command, and trust the exact
-definitions only if they match the source you reviewed.
-
-Codex records trust against the Hook definition hash. An update may require a
-new review. Do not use a hook-trust bypass for ordinary installation.
-
-## 5. Run a smoke test
-
-In a disposable repository, start a new task:
+In a disposable repository, start a review task:
 
 ```text
 $stop-that-shit review -- Review this repository. Report findings; do not edit.
 ```
 
-Ask Codex to attempt a covered write. The Hook denies it as an Intent
-violation. Then explicitly change the contract:
+A covered write must be denied. Then explicitly switch the contract:
 
 ```text
 $stop-that-shit change -- Create scratch/sts-smoke.txt containing the word pass.
 ```
 
-The narrow write should proceed. Remove the disposable file after confirming
-the result.
+The narrow write should proceed. This checks installation and contract
+switching. It does not prove a general improvement in model behavior.
 
-This smoke test checks installation and contract switching. It is not evidence
-that the plugin improves general Codex performance.
+For the three-arm baseline/instruction/plugin test, read
+[`evals/codex-paired/README.md`](evals/codex-paired/README.md). It starts no paid
+sessions unless you pass `--run`.
+
+## Optional: Skill only
+
+If you do not want command Hooks, ask the built-in Skill Installer to install
+only the shared Skill folder:
+
+```text
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/main/skills/stop-that-shit
+```
+
+Start a new task so Codex discovers it. Skill only needs no Hook trust and has
+no runtime enforcement. It is advisory, and model behavior can vary.
+
+## Local Guard development
+
+The repository includes `.agents/plugins/marketplace.json`. Install a local
+checkout with:
+
+```powershell
+codex plugin marketplace add <local-checkout-root>
+codex plugin add stop-that-shit@stop-that-shit
+```
 
 ## Disable or uninstall
 
-Use `/hooks` to disable the plugin Hooks immediately. Remove the plugin from the
-Plugins Directory to uninstall it. Remove the marketplace separately if it is
-no longer needed.
+Use `/hooks` to disable the Guard immediately, then remove the plugin and
+marketplace when no longer needed. Skill only can be removed separately from
+the Codex Skills directory.
 
-The plugin stores only the active per-session contract in the host-provided
-`PLUGIN_DATA` directory. Uninstall behavior for that directory depends on the
-host; review and remove it separately if desired.
+The Guard stores only the active per-session contract in the host-provided
+`PLUGIN_DATA` directory. Review that directory separately if you uninstall.

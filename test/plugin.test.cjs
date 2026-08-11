@@ -11,9 +11,18 @@ const root = path.join(__dirname, '..');
 
 test('plugin manifest and default hook discovery paths exist', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, '.codex-plugin', 'plugin.json'), 'utf8'));
+  const hooks = JSON.parse(fs.readFileSync(path.join(root, 'hooks', 'hooks.json'), 'utf8'));
   assert.equal(manifest.name, 'stop-that-shit');
   assert.ok(fs.existsSync(path.join(root, 'skills', 'stop-that-shit', 'SKILL.md')));
   assert.ok(fs.existsSync(path.join(root, 'hooks', 'hooks.json')));
+  assert.deepEqual(Object.keys(hooks.hooks).sort(), ['PreToolUse', 'UserPromptSubmit']);
+});
+
+test('the packaged Skill remains useful without the Guard hooks', () => {
+  const skill = fs.readFileSync(path.join(root, 'skills', 'stop-that-shit', 'SKILL.md'), 'utf8');
+  assert.match(skill, /works without the Guard/i);
+  assert.match(skill, /advisory/i);
+  assert.match(skill, /Do the requested work\. Keep necessary consequences\. Stop everything else\./);
 });
 
 test('hook commands resolve the plugin root inside Node and are shell-agnostic', () => {

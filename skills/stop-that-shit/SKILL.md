@@ -1,65 +1,58 @@
 ---
 name: stop-that-shit
-description: Keep Codex focused on requested and necessary work. Use for bounded changes, review-only tasks, scope creep, speculative hardening, unnecessary dependencies, or when the user invokes Stop That Shit.
+description: Keep Codex focused on requested and necessary work. Use for bounded changes, review-only tasks, scope creep, speculative hardening, unnecessary hashing or dependencies, repeated audit loops, or when the user invokes Stop That Shit.
 ---
 
 # Stop That Shit
 
 Do the requested work. Keep necessary consequences. Stop everything else.
 
-This Skill influences semantic judgment. The bundled Hook enforces only a few
-high-confidence facts that Codex exposes before an action. Do not describe it as
-a complete overengineering detector or security boundary.
+This Skill is advisory and works without the Guard hooks. It cannot guarantee
+model behavior. When the Guard is installed, the same directives also provide
+machine-enforced boundaries on supported Codex Hook paths.
 
-## Stop Ladder
+## Follow the Stop Ladder
 
-Before adding work that the user did not name, ask in order:
+Before adding work that the user did not name, ask:
 
 1. Did the user request it?
 2. Is it necessary to complete the requested result?
-3. What reachable repository or deployment evidence proves that necessity?
-4. Would omitting it fail the current acceptance?
+3. What reachable code, data, deployment state, or acceptance proves that need?
+4. Would omitting it fail the current task?
 
-If the answer is still no, do not implement it. Report it only when it is useful.
+If the answer remains no, do not implement it. Report it only when useful.
 
-Necessary callers, fixtures, tests, accessibility, security, compatibility, and
-migration work remain in scope when reachable evidence makes them necessary.
-Fewer files or lines is not the goal.
+Keep necessary callers, fixtures, tests, accessibility, security, compatibility,
+and migration work when reachable evidence requires them. Fewer files or lines
+is not the goal. The smallest correct result is.
 
-## Use the fast path
+## Respect the task mode
 
-For ordinary work, invoke the Skill and state the task normally:
+- `review`, `answer`, and `monitor` are read-only unless the user authorizes a
+  change.
+- `change` permits only requested work and necessary consequences.
+- Do not add hashing, a dependency, a compatibility layer, a migration, an
+  abstraction, or a subagent merely because it might help later.
+- Do not repeat searches, tests, or reviews after the requested result has enough
+  evidence.
+
+With Skill only, treat the mode as an instruction. With Guard installed, use:
 
 ```text
 $stop-that-shit change -- Fix the failing config test.
-$stop-that-shit review -- Review this diff. Do not edit.
+$stop-that-shit review -- Review this diff. Report findings; do not edit.
 ```
 
-The fast path does not require a file list. It preserves ordinary necessary
-edits while asking before a covered dependency addition and denying unbudgeted
-subagent launch or new hashing.
-
-## Use lock only when the boundary is already known
+Use a hard file lock only when the complete boundary is already known:
 
 ```text
-$stop-that-shit lock change files=src/config.cjs|test/config.test.cjs -- Fix this config behavior.
-$stop-that-shit change deps=allow -- Add the requested parser dependency.
-$stop-that-shit change hash=allow -- Generate the requested release checksum.
-$stop-that-shit change agents=1 -- Use one independent test shard.
+$stop-that-shit lock change files=src/config.cjs|test/config.test.cjs -- Fix this behavior.
 ```
 
-Do not invent a file boundary merely to use `lock`. If necessary consumers are
-uncertain, stay on the fast path, inspect the repository proportionately, and
-explain any material expansion before acting.
-
-## Respond to a stop
-
-Do not route around a blocked action with another tool. State the concrete
-action, why it crossed the current authority, and the smallest authorization or
-alternative that would let the task continue.
+Do not invent a file list to appear precise. Inspect proportionately and explain
+material expansion before acting.
 
 ## Finish
 
-Report the requested result, necessary consequences, any approved expansion,
-and the evidence that makes the result complete. Do not add another review loop
-only to satisfy this Skill.
+Report the requested result, necessary consequences, and the evidence that makes
+the task complete. Do not add a final audit loop only to satisfy this Skill.

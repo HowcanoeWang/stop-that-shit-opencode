@@ -2,6 +2,8 @@
 
 Stop That Shit is built from real Codex behavior, paired counterexamples, and
 small verifiable controls. You do not need to write Hook code to contribute.
+The smallest useful contribution is one sanitized issue with the request, the
+unnecessary or necessary action, and the reason it should be stopped or kept.
 
 ## Fastest ways to help
 
@@ -102,4 +104,3 @@ first-class contribution.
 - claims that Stop That Shit fixes Codex runtime bugs it can only mitigate.
 
 Bring the trace. Bring the counterexample. Help Codex stop the right shit.
-

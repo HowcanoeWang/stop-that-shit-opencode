@@ -1,18 +1,6 @@
 {
   "description": "Stop That Shit: a small on-demand policy with a few high-confidence Codex gates.",
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node -e \"const p=require('node:path');require(p.join(process.env.PLUGIN_ROOT??process.env.CLAUDE_PLUGIN_ROOT,'hooks','stop-that-shit.cjs'))\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "hooks": [
@@ -33,17 +21,6 @@
             "command": "node -e \"const p=require('node:path');require(p.join(process.env.PLUGIN_ROOT??process.env.CLAUDE_PLUGIN_ROOT,'hooks','stop-that-shit.cjs'))\"",
             "timeout": 5,
             "statusMessage": "Checking the Stop Ladder..."
-          }
-        ]
-      }
-    ],
-    "SubagentStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node -e \"const p=require('node:path');require(p.join(process.env.PLUGIN_ROOT??process.env.CLAUDE_PLUGIN_ROOT,'hooks','stop-that-shit.cjs'))\"",
-            "timeout": 5
           }
         ]
       }

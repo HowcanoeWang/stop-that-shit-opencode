@@ -5,7 +5,7 @@
   "description": "Local-first execution control for Codex",
   "license": "MIT",
   "scripts": {
-    "test": "node --test test/*.test.cjs",
+    "test": "node --test test/contracts.test.cjs test/control-protocol.test.cjs test/decision.test.cjs test/hooks.test.cjs test/plugin.test.cjs",
     "eval": "node scripts/evaluate-cases.cjs",
     "release:check": "node scripts/release-check.cjs",
     "release:build": "node scripts/build-release.cjs"

@@ -3,6 +3,10 @@
 The default installation is the Guard: one Skill plus two Hook events. Install
 Skill only when you prefer advisory guidance without runtime enforcement.
 
+If a Codex agent is doing the installation for you, give it
+[`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md). That guide separates commands
+the agent can run from the Hook review that you must complete yourself.
+
 ## Default: Skill + Guard
 
 The Guard requires Node.js 18 or newer. Add the repository as a Codex

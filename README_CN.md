@@ -40,7 +40,7 @@ codex plugin marketplace add lennney/stop-that-shit
 codex plugin add stop-that-shit@stop-that-shit
 ```
 
-重启 Codex。在新的 CLI TUI 中输入 `/hooks`，检查命令后信任 `UserPromptSubmit` 和 `PreToolUse`。状态说明和无 Hook 安装方式见[安装](#安装)。
+重启 Codex。在新的 CLI TUI 中输入 `/hooks`，检查命令后信任 `UserPromptSubmit` 和 `PreToolUse`。状态说明和无 Hook 安装方式见[安装](#安装)。也可以把 [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md) 交给 Codex，让它完成非交互步骤。
 
 ## Bad Case / Good Case
 

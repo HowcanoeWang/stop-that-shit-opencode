@@ -9,7 +9,7 @@ unnecessary or necessary action, and the reason it should be stopped or kept.
 
 1. Submit a **Bad Case** where Codex left the authorized task.
 2. Submit a **Good Case** where a seemingly extra action was actually necessary.
-3. Pair an existing case labeled `needs-good-case` or `needs-bad-case`.
+3. Pair an existing case labeled `needs-counterexample`.
 4. Turn a sanitized case into a reproducible fixture.
 5. Improve a classifier, Hook, test, installer, or explanation.
 6. Re-run the paired evaluation on another supported Codex version or model.
@@ -26,9 +26,26 @@ unnecessary or necessary action, and the reason it should be stopped or kept.
 | Reproducible model evaluation | `evals/codex-paired/` |
 | Regression coverage | `test/` |
 
-User-facing setup belongs in `README.md`, `README_CN.md`, or `INSTALL.md`.
-Keep raw sessions, private repositories, and launch material out of this
-repository.
+User-facing setup belongs in `README.md`, `README_CN.md`, `INSTALL.md`, or
+`INSTALL_FOR_AGENTS.md`. Keep raw sessions, private repositories, and launch
+material out of this repository.
+
+## Before opening a pull request
+
+- Open or link a case before changing Guard decisions.
+- Keep one concern in the pull request. Do not bundle policy, installer, and
+  README changes unless one cannot work without the others.
+- Add only files needed for the stated change. Do not reformat or reorganize
+  unrelated files.
+- Do not edit generated release output or commit local run directories.
+- Do not start paid Codex evaluations unless a maintainer requests them.
+- Run the relevant focused test, then the repository checks listed in the pull
+  request template.
+
+All pull requests require maintainer review. `CODEOWNERS` requests that review
+for every tracked path. Maintainers can close changes that expand the product
+boundary, lack a counterexample, expose private material, or make claims beyond
+the supplied evidence.
 
 ## Evidence levels
 

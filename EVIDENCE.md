@@ -98,9 +98,8 @@ The following are explicit limitations, not 0.0.1 release blockers. The project
 does not require a large benchmark to make a probabilistic mitigation claim.
 
 - a multi-scenario live baseline/plugin matrix for the reduced candidate;
-- installation from a public immutable Git revision;
 - interactive `/hooks` trust on a separate physical machine;
-- macOS and Linux behavior;
+- live macOS and Linux Hook behavior beyond the automated CI matrix;
 - several distinct community scenarios and multiple seeds;
 - specialized tool paths that may bypass normal Hook coverage.
 

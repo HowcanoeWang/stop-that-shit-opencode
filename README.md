@@ -54,7 +54,9 @@ codex plugin add stop-that-shit@stop-that-shit
 
 Restart Codex. In a fresh CLI TUI, enter `/hooks` and trust
 `UserPromptSubmit` and `PreToolUse` after you inspect their commands. See
-[Install](#install) for expected status and the no-Hook option.
+[Install](#install) for expected status and the no-Hook option. You can also
+give [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md) to Codex and let it run
+the non-interactive steps.
 
 ## Bad Case / Good Case
 

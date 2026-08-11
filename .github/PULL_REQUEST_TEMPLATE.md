@@ -1,6 +1,11 @@
 ## Case
 
-Name the Bad/Good pair this changes or explain why no decision rule changes.
+Link the issue or name the Bad/Good pair this changes. If no decision rule
+changes, say why a case is not required.
+
+## Scope
+
+List the files or product surface this pull request is allowed to change.
 
 ## Change
 
@@ -12,7 +17,9 @@ Describe the smallest observable change.
 - [ ] Paired Good Case still proceeds.
 - [ ] Requested result still completes.
 - [ ] `npm test`, `npm run eval`, and `npm run release:check` pass.
+- [ ] No unrelated file was reformatted, reorganized, or included.
 - [ ] No private material or internal research is included.
+- [ ] No paid Codex evaluation was started without maintainer approval.
 
 ## Limitations
 

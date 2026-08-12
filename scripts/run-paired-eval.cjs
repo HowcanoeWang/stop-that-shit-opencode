@@ -14,7 +14,8 @@ const {
   assertWorkspaceRootIsolated,
   countHookBlocks,
   evaluateAcceptance,
-  materializeFixture
+  materializeFixture,
+  resolveCodexInvocation
 } = require('./paired-eval-lib.cjs');
 
 const root = path.resolve(__dirname, '..');
@@ -88,21 +89,26 @@ function filterPlan(plan, options) {
   };
 }
 
-function findCodexBinary() {
-  if (process.env.STS_CODEX_BIN) return process.env.STS_CODEX_BIN;
+function findCodexInvocation() {
+  if (process.env.STS_CODEX_BIN) {
+    const configured = path.resolve(process.env.STS_CODEX_BIN);
+    return configured.toLowerCase().endsWith('.js')
+      ? { command: process.execPath, argsPrefix: [configured] }
+      : { command: configured, argsPrefix: [] };
+  }
   const lookup = process.platform === 'win32'
     ? spawnSync('where.exe', ['codex'], { encoding: 'utf8' })
     : spawnSync('which', ['codex'], { encoding: 'utf8' });
   if (lookup.status !== 0) throw new Error('codex CLI was not found on PATH');
   const candidates = lookup.stdout.split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
-  if (process.platform === 'win32') {
-    return candidates.find((value) => value.toLowerCase().endsWith('.exe'))
-      || candidates.find((value) => !/\.(?:cmd|ps1)$/i.test(value));
-  }
-  return candidates[0];
+  return resolveCodexInvocation(candidates);
 }
 
-function preflightEvalHome(binary, codexHome) {
+function runCodex(invocation, args, options) {
+  return spawnSync(invocation.command, [...invocation.argsPrefix, ...args], options);
+}
+
+function preflightEvalHome(invocation, codexHome) {
   if (!codexHome) {
     throw new Error('--codex-home or STS_EVAL_CODEX_HOME is required with --run');
   }
@@ -111,11 +117,12 @@ function preflightEvalHome(binary, codexHome) {
     throw new Error(`eval Codex home is not a directory: ${resolved}`);
   }
   const env = { ...process.env, CODEX_HOME: resolved };
-  const login = spawnSync(binary, ['login', 'status'], { encoding: 'utf8', env });
+  const login = runCodex(invocation, ['login', 'status'], { encoding: 'utf8', env });
   if (login.status !== 0) {
-    throw new Error('the isolated eval Codex home is not authenticated');
+    const detail = login.error ? ` (${login.error.code || login.error.message})` : '';
+    throw new Error(`the isolated eval Codex home is not authenticated${detail}`);
   }
-  const plugins = spawnSync(binary, ['plugin', 'list'], { encoding: 'utf8', env });
+  const plugins = runCodex(invocation, ['plugin', 'list'], { encoding: 'utf8', env });
   if (plugins.status !== 0) {
     throw new Error(plugins.stderr || 'could not list plugins in the isolated eval Codex home');
   }
@@ -137,7 +144,7 @@ function finalResponse(eventsText) {
   return response;
 }
 
-function runCell(binary, cell, options, evalProfile) {
+function runCell(invocation, cell, options, evalProfile) {
   const workspace = path.join(options.workspaceRoot, cell.workspace);
   const outputDirectory = path.join(evalRoot, path.dirname(cell.workspace));
   const archivedWorkspace = path.join(evalRoot, cell.workspace);
@@ -146,7 +153,7 @@ function runCell(binary, cell, options, evalProfile) {
     fs.mkdirSync(outputDirectory, { recursive: true });
     const args = buildCodexArgs(cell, { model: options.model, workspace });
     const startedAt = Date.now();
-    const execution = spawnSync(binary, args, {
+    const execution = runCodex(invocation, args, {
       cwd: workspace,
       encoding: 'utf8',
       timeout: options.timeoutMs,
@@ -221,8 +228,8 @@ function main() {
   if (!options.codexHome) {
     throw new Error('--codex-home or STS_EVAL_CODEX_HOME is required with --run');
   }
-  const binary = findCodexBinary();
-  const evalProfile = preflightEvalHome(binary, options.codexHome);
+  const invocation = findCodexInvocation();
+  const evalProfile = preflightEvalHome(invocation, options.codexHome);
   options.workspaceRoot = assertWorkspaceRootIsolated(root, options.workspaceRoot);
   assertNoAgentInstructions(options.workspaceRoot);
   assertNoAgentInstructions(evalProfile.codexHome, { ancestors: false });
@@ -232,7 +239,7 @@ function main() {
   const results = [];
   for (const cell of plan.cells) {
     process.stderr.write(`RUN ${cell.id}\n`);
-    const result = runCell(binary, cell, options, evalProfile);
+    const result = runCell(invocation, cell, options, evalProfile);
     results.push(result);
     process.stderr.write(`${result.acceptance.pass ? 'PASS' : 'FAIL'} ${cell.id}\n`);
   }

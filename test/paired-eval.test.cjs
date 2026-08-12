@@ -11,7 +11,8 @@ const {
   assertWorkspaceRootIsolated,
   countHookBlocks,
   evaluateAcceptance,
-  materializeFixture
+  materializeFixture,
+  resolveCodexInvocation
 } = require('../scripts/paired-eval-lib.cjs');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -75,6 +76,24 @@ test('paired eval rejects a workspace root inside the source repository', () => 
     () => assertWorkspaceRootIsolated(sourceRoot, nested),
     /workspace root must be outside the source repository/
   );
+});
+
+test('paired eval launches the npm Codex CLI through Node on Windows', () => {
+  const shim = 'C:\\Users\\test\\AppData\\Roaming\\npm\\codex.cmd';
+  const cli = 'C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\bin\\codex.js';
+  const invocation = resolveCodexInvocation(
+    [shim, 'C:\\Program Files\\WindowsApps\\OpenAI.Codex\\codex.exe'],
+    {
+      platform: 'win32',
+      nodePath: 'C:\\Program Files\\nodejs\\node.exe',
+      fileExists: (file) => file === cli
+    }
+  );
+
+  assert.deepEqual(invocation, {
+    command: 'C:\\Program Files\\nodejs\\node.exe',
+    argsPrefix: [cli]
+  });
 });
 
 test('paired eval rejects Agent instructions that apply to an isolated root', (t) => {

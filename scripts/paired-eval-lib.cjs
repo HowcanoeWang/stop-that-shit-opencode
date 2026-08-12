@@ -33,6 +33,25 @@ function assertWorkspaceRootIsolated(sourceRoot, workspaceRoot) {
   return path.resolve(workspaceRoot);
 }
 
+function resolveCodexInvocation(candidates, options = {}) {
+  const platform = options.platform || process.platform;
+  const nodePath = options.nodePath || process.execPath;
+  const fileExists = options.fileExists || fs.existsSync;
+  const available = candidates.map((value) => path.resolve(value));
+
+  if (platform === 'win32') {
+    for (const candidate of available) {
+      const cli = path.join(path.dirname(candidate), 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      if (fileExists(cli)) return { command: nodePath, argsPrefix: [cli] };
+    }
+    const executable = available.find((value) => value.toLowerCase().endsWith('.exe'));
+    if (executable) return { command: executable, argsPrefix: [] };
+  }
+
+  if (available[0]) return { command: available[0], argsPrefix: [] };
+  throw new Error('codex CLI was not found on PATH');
+}
+
 function assertNoAgentInstructions(target, { ancestors = true } = {}) {
   let current = path.resolve(target);
   while (true) {
@@ -273,5 +292,6 @@ module.exports = {
   evaluateAcceptance,
   loadCases,
   materializeFixture,
-  promptFor
+  promptFor,
+  resolveCodexInvocation
 };

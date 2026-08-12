@@ -3,12 +3,15 @@
 'use strict';
 
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const {
   buildCodexArgs,
   buildPlan,
+  assertNoAgentInstructions,
   assertIsolatedPluginList,
+  assertWorkspaceRootIsolated,
   countHookBlocks,
   evaluateAcceptance,
   materializeFixture
@@ -25,7 +28,9 @@ function parseArgs(argv) {
     arms: [],
     model: null,
     timeoutMs: 600_000,
-    codexHome: process.env.STS_EVAL_CODEX_HOME || null
+    codexHome: process.env.STS_EVAL_CODEX_HOME || null,
+    workspaceRoot: process.env.STS_EVAL_WORKSPACE_ROOT
+      || path.join(os.tmpdir(), 'stop-that-shit-eval-workspaces')
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -36,6 +41,7 @@ function parseArgs(argv) {
     else if (arg === '--arm') options.arms.push(argv[++index]);
     else if (arg === '--model') options.model = argv[++index];
     else if (arg === '--codex-home') options.codexHome = argv[++index];
+    else if (arg === '--workspace-root') options.workspaceRoot = argv[++index];
     else if (arg === '--timeout-ms') options.timeoutMs = Number(argv[++index]);
     else if (arg === '--help' || arg === '-h') options.help = true;
     else throw new Error(`unknown argument: ${arg}`);
@@ -58,6 +64,7 @@ function usage() {
     '  --arm <id>       Select baseline, instruction, or plugin; repeatable',
     '  --model <id>     Override the configured Codex model',
     '  --codex-home <p> Dedicated authenticated Codex home with only this plugin enabled',
+    '  --workspace-root <p> External root for isolated live workspaces',
     '  --timeout-ms <n> Timeout for each Codex session'
   ].join('\n');
 }
@@ -131,52 +138,59 @@ function finalResponse(eventsText) {
 }
 
 function runCell(binary, cell, options, evalProfile) {
-  const workspace = path.join(evalRoot, cell.workspace);
-  materializeFixture(cell.fixture, workspace);
-  const outputDirectory = path.dirname(workspace);
-  const args = buildCodexArgs(cell, { model: options.model, workspace });
-  const startedAt = Date.now();
-  const execution = spawnSync(binary, args, {
-    cwd: workspace,
-    encoding: 'utf8',
-    timeout: options.timeoutMs,
-    maxBuffer: 32 * 1024 * 1024,
-    env: evalProfile.env
-  });
-  const durationMs = Date.now() - startedAt;
-  const eventsText = execution.stdout || '';
-  const diagnosticText = `${eventsText}\n${execution.stderr || ''}`;
-  const responseText = finalResponse(eventsText);
-  const acceptance = evaluateAcceptance({
-    workspace,
-    acceptance: cell.acceptance,
-    responseText,
-    eventsText
-  });
-  const result = {
-    schemaVersion: 1,
-    id: cell.id,
-    caseId: cell.caseId,
-    family: cell.family,
-    kind: cell.kind,
-    arm: cell.arm,
-    run: cell.run,
-    prompt: cell.prompt,
-    exitStatus: execution.status,
-    signal: execution.signal,
-    spawnError: execution.error ? execution.error.message : null,
-    durationMs,
-    hookBlockCount: countHookBlocks(diagnosticText),
-    acceptance
-  };
-  fs.writeFileSync(path.join(outputDirectory, 'events.jsonl'), eventsText, 'utf8');
-  fs.writeFileSync(
-    path.join(outputDirectory, 'stderr.txt'),
-    execution.stderr || (execution.error ? `${execution.error.stack || execution.error.message}\n` : ''),
-    'utf8'
-  );
-  fs.writeFileSync(path.join(outputDirectory, 'result.json'), `${JSON.stringify(result, null, 2)}\n`, 'utf8');
-  return result;
+  const workspace = path.join(options.workspaceRoot, cell.workspace);
+  const outputDirectory = path.join(evalRoot, path.dirname(cell.workspace));
+  const archivedWorkspace = path.join(evalRoot, cell.workspace);
+  try {
+    materializeFixture(cell.fixture, workspace);
+    fs.mkdirSync(outputDirectory, { recursive: true });
+    const args = buildCodexArgs(cell, { model: options.model, workspace });
+    const startedAt = Date.now();
+    const execution = spawnSync(binary, args, {
+      cwd: workspace,
+      encoding: 'utf8',
+      timeout: options.timeoutMs,
+      maxBuffer: 32 * 1024 * 1024,
+      env: evalProfile.env
+    });
+    const durationMs = Date.now() - startedAt;
+    const eventsText = execution.stdout || '';
+    const diagnosticText = `${eventsText}\n${execution.stderr || ''}`;
+    const responseText = finalResponse(eventsText);
+    const acceptance = evaluateAcceptance({
+      workspace,
+      acceptance: cell.acceptance,
+      responseText,
+      eventsText
+    });
+    const result = {
+      schemaVersion: 1,
+      id: cell.id,
+      caseId: cell.caseId,
+      family: cell.family,
+      kind: cell.kind,
+      arm: cell.arm,
+      run: cell.run,
+      prompt: cell.prompt,
+      exitStatus: execution.status,
+      signal: execution.signal,
+      spawnError: execution.error ? execution.error.message : null,
+      durationMs,
+      hookBlockCount: countHookBlocks(diagnosticText),
+      acceptance
+    };
+    fs.writeFileSync(path.join(outputDirectory, 'events.jsonl'), eventsText, 'utf8');
+    fs.writeFileSync(
+      path.join(outputDirectory, 'stderr.txt'),
+      execution.stderr || (execution.error ? `${execution.error.stack || execution.error.message}\n` : ''),
+      'utf8'
+    );
+    fs.writeFileSync(path.join(outputDirectory, 'result.json'), `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+    fs.cpSync(workspace, archivedWorkspace, { recursive: true });
+    return result;
+  } finally {
+    fs.rmSync(workspace, { recursive: true, force: true });
+  }
 }
 
 function summarize(results) {
@@ -209,6 +223,9 @@ function main() {
   }
   const binary = findCodexBinary();
   const evalProfile = preflightEvalHome(binary, options.codexHome);
+  options.workspaceRoot = assertWorkspaceRootIsolated(root, options.workspaceRoot);
+  assertNoAgentInstructions(options.workspaceRoot);
+  assertNoAgentInstructions(evalProfile.codexHome, { ancestors: false });
   const runRoot = path.join(evalRoot, 'runs', plan.stamp);
   fs.mkdirSync(runRoot, { recursive: true });
   fs.writeFileSync(path.join(runRoot, 'plan.json'), `${JSON.stringify(plan, null, 2)}\n`, 'utf8');

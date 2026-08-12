@@ -7,6 +7,8 @@ const {
   buildPlan,
   buildCodexArgs,
   assertIsolatedPluginList,
+  assertNoAgentInstructions,
+  assertWorkspaceRootIsolated,
   countHookBlocks,
   evaluateAcceptance,
   materializeFixture
@@ -62,6 +64,29 @@ test('paired eval rejects a Codex home with another enabled plugin', () => {
   assert.throws(
     () => assertIsolatedPluginList(contaminated),
     /only Stop That Shit may be enabled/
+  );
+});
+
+test('paired eval rejects a workspace root inside the source repository', () => {
+  const sourceRoot = path.resolve(__dirname, '..');
+  const nested = path.join(sourceRoot, 'evals', 'codex-paired', 'runs');
+
+  assert.throws(
+    () => assertWorkspaceRootIsolated(sourceRoot, nested),
+    /workspace root must be outside the source repository/
+  );
+});
+
+test('paired eval rejects Agent instructions that apply to an isolated root', (t) => {
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'sts-instructions-'));
+  const target = path.join(parent, 'workspace-root');
+  fs.mkdirSync(target);
+  fs.writeFileSync(path.join(parent, 'AGENTS.md'), 'applies below\n');
+  t.after(() => fs.rmSync(parent, { recursive: true, force: true }));
+
+  assert.throws(
+    () => assertNoAgentInstructions(target),
+    /Agent instructions apply to the eval path/
   );
 });
 

@@ -19,6 +19,37 @@ const INSTRUCTION_CONTROL = [
   'Respect every explicit file boundary.'
 ].join(' ');
 
+const AGENT_INSTRUCTION_FILES = ['AGENTS.override.md', 'AGENTS.md'];
+
+function isWithin(parent, child) {
+  const relative = path.relative(path.resolve(parent), path.resolve(child));
+  return relative === '' || (!relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative));
+}
+
+function assertWorkspaceRootIsolated(sourceRoot, workspaceRoot) {
+  if (isWithin(sourceRoot, workspaceRoot)) {
+    throw new Error('eval workspace root must be outside the source repository');
+  }
+  return path.resolve(workspaceRoot);
+}
+
+function assertNoAgentInstructions(target, { ancestors = true } = {}) {
+  let current = path.resolve(target);
+  while (true) {
+    for (const name of AGENT_INSTRUCTION_FILES) {
+      const candidate = path.join(current, name);
+      if (fs.existsSync(candidate)) {
+        throw new Error(`Agent instructions apply to the eval path: ${candidate}`);
+      }
+    }
+    if (!ancestors) break;
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  return path.resolve(target);
+}
+
 function loadCases(root = path.resolve(__dirname, '..')) {
   return JSON.parse(
     fs.readFileSync(path.join(root, 'evals', 'codex-paired', 'cases.json'), 'utf8')
@@ -231,7 +262,9 @@ function evaluateAcceptance({ workspace, acceptance, responseText = '', eventsTe
 module.exports = {
   ARMS,
   INSTRUCTION_CONTROL,
+  assertNoAgentInstructions,
   assertIsolatedPluginList,
+  assertWorkspaceRootIsolated,
   buildPlan,
   buildCodexArgs,
   changedPaths,

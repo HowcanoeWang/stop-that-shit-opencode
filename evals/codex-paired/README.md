@@ -51,6 +51,8 @@ npm run eval:paired -- --dry-run --runs 1 --case hash --arm plugin
 Live evaluation requires:
 
 - a dedicated, authenticated Codex home used only for this evaluation;
+- an external workspace root with no applicable `AGENTS.md` or
+  `AGENTS.override.md` in its ancestor chain;
 - Stop That Shit installed there from the exact revision under test;
 - its two Hooks reviewed and trusted in the CLI TUI;
 - no other enabled plugin, global `AGENTS.md`, or instruction that applies the
@@ -81,17 +83,23 @@ npm run eval:paired -- --run --model gpt-5.6-luna
 ```
 
 You may pass the profile with `--codex-home` instead of the environment
-variable. The baseline and instruction arms start Codex with all plugins
+variable. Live fixture repositories default to a directory under the operating
+system temporary directory, outside this source repository. Override that root
+with `--workspace-root` or `STS_EVAL_WORKSPACE_ROOT`; the runner refuses a root
+inside the source repository or below an Agent instruction file.
+
+The baseline and instruction arms start Codex with all plugins
 disabled. The plugin arm enables plugins and Hooks. Since the preflight permits
 only Stop That Shit, this isolates the intended variable.
 
 The runner does not use `--dangerously-bypass-hook-trust`. Each cell receives a
 fresh Git fixture and an ephemeral Codex session.
 
-Runs are sequential. Raw events, stderr, the final workspace, and a scored
-`result.json` are stored under `evals/codex-paired/runs/`. This directory is
-ignored by Git. Review generated artifacts for private paths and task content
-before sharing them.
+Runs are sequential. Codex executes in the external workspace root. After each
+cell, the runner archives raw events, stderr, the final workspace, and a scored
+`result.json` under `evals/codex-paired/runs/`, then removes the external cell
+workspace. The archive directory is ignored by Git. Review generated artifacts
+for private paths and task content before sharing them.
 
 ## Scoring
 

@@ -27,7 +27,7 @@ function main() {
   const generated = generateValidatorSource();
   if (process.argv.includes('--check')) {
     const current = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8') : '';
-    if (current !== generated) {
+    if (current.replace(/\r\n/g, '\n') !== generated.replace(/\r\n/g, '\n')) {
       process.stderr.write('CaseBundle validator is stale; run npm run schema:build\n');
       process.exitCode = 1;
       return;

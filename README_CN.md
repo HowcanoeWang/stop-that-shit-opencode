@@ -5,6 +5,14 @@
 <h1 align="center">Stop That Shit</h1>
 
 <p align="center">
+  <img src="https://img.shields.io/github/stars/lennney/stop-that-shit?style=flat-square&color=111111&label=stars" alt="GitHub stars">
+  <img src="https://img.shields.io/github/v/release/lennney/stop-that-shit?include_prereleases&sort=semver&style=flat-square&color=111111&label=release" alt="最新版本">
+  <a href="https://github.com/lennney/stop-that-shit/actions/workflows/ci.yml"><img src="https://github.com/lennney/stop-that-shit/actions/workflows/ci.yml/badge.svg" alt="CI 状态"></a>
+  <img src="https://img.shields.io/badge/works%20with-Codex-111111?style=flat-square" alt="支持 Codex">
+  <img src="https://img.shields.io/github/license/lennney/stop-that-shit?style=flat-square&color=111111" alt="MIT 许可证">
+</p>
+
+<p align="center">
   <strong>你只要一个文件，Codex 却拆成六个模块，叫来三个 Agent，又给所有东西算了一遍 SHA-256。Stop That Shit。</strong><br>
   Stop That Shit 在本地检查 Codex 的动作，拦住它擅自扩任务、叫 subagent、加依赖或算哈希。<br>
   <a href="#两条命令安装">安装</a> ·

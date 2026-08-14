@@ -5,6 +5,14 @@
 <h1 align="center">Stop That Shit</h1>
 
 <p align="center">
+  <img src="https://img.shields.io/github/stars/lennney/stop-that-shit?style=flat-square&color=111111&label=stars" alt="GitHub stars">
+  <img src="https://img.shields.io/github/v/release/lennney/stop-that-shit?include_prereleases&sort=semver&style=flat-square&color=111111&label=release" alt="Latest release">
+  <a href="https://github.com/lennney/stop-that-shit/actions/workflows/ci.yml"><img src="https://github.com/lennney/stop-that-shit/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <img src="https://img.shields.io/badge/works%20with-Codex-111111?style=flat-square" alt="Works with Codex">
+  <img src="https://img.shields.io/github/license/lennney/stop-that-shit?style=flat-square&color=111111" alt="MIT license">
+</p>
+
+<p align="center">
   <strong>You asked for one file. Codex split it into six modules, called in three agents, and added SHA-256 checksums. Stop That Shit.</strong><br>
   Stop That Shit runs locally and blocks unneeded scope, subagents, dependencies, and hashes in Codex tasks.<br>
   <a href="#install-in-two-commands">Install</a> ·

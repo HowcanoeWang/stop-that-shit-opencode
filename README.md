@@ -46,8 +46,8 @@ State: ARMED / review
 Event: evt_...
 ```
 
-Version [`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2)
-is Technical Preview 2. LLM runs vary, and Hooks see only part
+Version [`0.0.3`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.3)
+is Technical Preview 3. LLM runs vary, and Hooks see only part
 of a Codex run. The Skill and Guard can reduce some unwanted work. Neither can
 guarantee how the model will behave.
 
@@ -132,7 +132,7 @@ ALLOW
 Use a digest to skip rereading an unchanged large file.
 ```
 
-`0.0.2` denies a recognized new hash operation by default. Use `hash=allow`
+`0.0.3` denies a recognized new hash operation by default. Use `hash=allow`
 when the user or the repository supplies the missing job. The Hook does not try
 to infer that job from code it has not seen.
 
@@ -203,7 +203,7 @@ The Skill guides semantic choices. The Hook enforces explicit facts before a
 supported tool runs. A small host Adapter translates Codex events into the core
 decision interface.
 
-Codex is the only implemented Adapter in `0.0.2`. Another harness can use the
+Codex is the only implemented Adapter in `0.0.3`. Another harness can use the
 same core when it provides an equivalent before-action event. See
 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md).
 
@@ -215,6 +215,12 @@ quality, repair Codex runtime bugs, or act as a security sandbox.
 The test suite proves policy behavior on covered events. It does not prove a
 general improvement in model behavior. [EVIDENCE.md](EVIDENCE.md) records the
 tests, live runs, null results, and exclusions.
+
+In my own use, I have not seen the unnecessary SHA-256 behavior recur since
+enabling Stop That Shit. That is a personal observation, not a controlled
+benchmark. The local Runtime records metadata-only Hook checks and separates
+checked actions, context responses, and permission denies. It still reports
+host effect as `unobserved`.
 
 ## Install
 
@@ -240,7 +246,7 @@ message, use the CLI TUI for this review, then restart Desktop.
 If you do not want command Hooks, install only the advisory Skill:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.3/skills/stop-that-shit
 ```
 
 Start a new task, then invoke `$stop-that-shit`. This path needs no Hook trust,

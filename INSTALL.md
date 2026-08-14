@@ -1,7 +1,7 @@
-# Install Stop That Shit 0.0.2
+# Install Stop That Shit 0.0.3 Technical Preview 3
 
 The current immutable preview is
-[`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2).
+[`0.0.3`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.3).
 
 The default installation is the Guard: one Skill plus two Hook events. Install
 Skill only when you prefer advisory guidance without runtime enforcement.
@@ -83,7 +83,7 @@ If you do not want command Hooks, ask the built-in Skill Installer to install
 only the shared Skill folder:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.3/skills/stop-that-shit
 ```
 
 Start a new task so Codex discovers it. Skill only needs no Hook trust and has

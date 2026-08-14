@@ -38,7 +38,7 @@ State: ARMED / review
 Event: evt_...
 ```
 
-[`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2) 是第二个技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界行为，但都不能保证模型每次听话。
+[`0.0.3`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.3) 是第三个技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界行为，但都不能保证模型每次听话。
 
 | 从哪里开始 | 提供什么 | 使用成本 |
 | --- | --- | --- |
@@ -107,7 +107,7 @@ ALLOW
 用 digest 跳过一个未变化大文件的重复读取。
 ```
 
-`0.0.2` 默认拒绝可识别的新 hash 操作。用户明确要求，或仓库中的代码与发布流程证明它确实必要时，就用 `hash=allow` 放行。Hook 不会根据自己没读过的代码猜测这个用途。
+`0.0.3` 默认拒绝可识别的新 hash 操作。用户明确要求，或仓库中的代码与发布流程证明它确实必要时，就用 `hash=allow` 放行。Hook 不会根据自己没读过的代码猜测这个用途。
 
 ## 怎么用
 
@@ -165,13 +165,15 @@ Hook 必须收到受支持的事件和足够的输入才能判断。它不会看
 
 Skill 负责语义判断。Hook 在受支持的工具运行前检查明确事实。Codex Adapter 把宿主事件翻译成核心决策接口。
 
-`0.0.2` 只实现了 Codex Adapter。其他 harness 需要提供等价的 before-action 事件，才能复用同一套核心。接口说明见 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md)。
+`0.0.3` 只实现了 Codex Adapter。其他 harness 需要提供等价的 before-action 事件，才能复用同一套核心。接口说明见 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md)。
 
 ## 局限和证据
 
 部分特殊工具路径可能绕过普通 Hook。插件不负责判断代码质量，不修复 Codex runtime bug，也不是安全沙箱。
 
 测试只能证明规则在 covered event 上按设计运行，不能证明模型行为会普遍改善。[EVIDENCE.md](EVIDENCE.md) 记录了测试、真实运行、无差异结果和排除项。
+
+就我自己的使用情况看，启用 Stop That Shit 后，我还没有再遇到那种没有实际消费者却先生成 SHA-256 的动作。这是个人观察，不是受控 benchmark。本地 Runtime 会记录只含元数据的 Hook 检查，区分 checked action、context response 和 permission deny；它仍然会把宿主效果记为 `unobserved`。
 
 ## 安装
 
@@ -193,7 +195,7 @@ codex plugin add stop-that-shit@stop-that-shit
 不想启用命令 Hook 时，让 Codex 内置的 Skill Installer 只安装 Skill：
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.3/skills/stop-that-shit
 ```
 
 新开任务后调用 `$stop-that-shit`。这条路径不需要 Hook 信任，但不能机器拦截越界动作，也不会改变 Codex 原有的 sandbox 和 approval 设置。

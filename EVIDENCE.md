@@ -1,8 +1,19 @@
 # Evidence
 
-Version: 0.0.2 Technical Preview 2
-Release: https://github.com/lennney/stop-that-shit/releases/tag/0.0.2
-Tagged commit: `a5c937045e8a8de75e897459e4ba5f6c2cc9ae81`
+## Personal field observation
+
+As of 2026-08-14, after using Stop That Shit locally, the maintainer has not
+seen the unnecessary SHA-256 behavior recur. This is an anecdotal observation,
+not a controlled benchmark or a claim about general model behavior.
+
+The local Runtime now records metadata-only Hook checks and separates checked
+actions, context responses, and permission denies. It records host effect as
+`unobserved`; a returned permission deny is not evidence that the host skipped
+the action.
+
+Version: 0.0.3 Technical Preview 3
+Release: https://github.com/lennney/stop-that-shit/releases/tag/0.0.3
+Previous release: https://github.com/lennney/stop-that-shit/releases/tag/0.0.2
 Last updated: 2026-08-14
 
 ## Published technical preview
@@ -34,9 +45,9 @@ Verified locally:
   evidence without changing the active task contract;
 - the four public families are validated `CaseBundle v1` directories, and
   archived results can be rescored without another model call.
-- the tagged commit passed 92/92 automated tests, 14/14 executable policy case
-  arms, the 101-file release allowlist, and an installed-cache Hook smoke before
-  publication.
+- the 0.0.3 release candidate passed 92/92 automated tests, 14/14 executable
+  policy case arms, the 101-file release allowlist, and an installed-cache Hook
+  smoke before publication.
 
 The current runtime stores active contract state plus metadata-only decision
 events and independent annotations. It does not store prompts, tool inputs,
@@ -147,7 +158,7 @@ were run after the null result.
 
 ## Not yet verified
 
-The following are explicit limitations, not 0.0.2 release blockers. The project
+The following are explicit limitations, not 0.0.3 release blockers. The project
 does not require a large benchmark to make a probabilistic mitigation claim.
 
 - a multi-scenario live baseline/plugin matrix for the reduced candidate;
@@ -206,7 +217,7 @@ leading synthetic fixtures.
 Do not claim that Stop That Shit solves Codex overengineering or publish an
 improvement percentage from unit tests or this single scenario.
 
-The defensible 0.0.2 claim is:
+The defensible 0.0.3 claim is:
 
 > Stop That Shit gives Codex a short on-demand decision ladder and enforces a
 > few explicit task-authority rules on covered Hook paths. It may reduce some

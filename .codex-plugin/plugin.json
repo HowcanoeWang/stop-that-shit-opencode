@@ -1,7 +1,7 @@
 {
   "name": "stop-that-shit",
   "version": "0.0.2",
-  "description": "Keep Codex on task by preserving task mode, scope, and execution state.",
+  "description": "Stop unneeded scope, subagents, dependencies, and hashes in Codex tasks.",
   "author": {
     "name": "Stop That Shit contributors",
     "url": "https://github.com/lennney"
@@ -19,8 +19,8 @@
   "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Stop That Shit",
-    "shortDescription": "Keep Codex on task. Stop the rest.",
-    "longDescription": "A local-first Codex execution guard for mode violations, scope creep, hypothetical hardening, and task-state thrashing.",
+    "shortDescription": "Stop small Codex tasks from growing extra machinery.",
+    "longDescription": "Stop That Shit runs locally and blocks unneeded scope, subagents, dependencies, and hashes in Codex tasks.",
     "developerName": "Stop That Shit contributors",
     "category": "Productivity",
     "capabilities": [

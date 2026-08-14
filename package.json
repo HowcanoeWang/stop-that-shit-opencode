@@ -2,7 +2,7 @@
   "name": "stop-that-shit",
   "version": "0.0.2",
   "private": true,
-  "description": "Local-first execution control for Codex",
+  "description": "Stop unneeded scope, subagents, dependencies, and hashes in Codex tasks",
   "license": "MIT",
   "scripts": {
     "schema:build": "node scripts/build-case-bundle-validator.cjs",

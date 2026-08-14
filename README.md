@@ -5,7 +5,8 @@
 <h1 align="center">Stop That Shit</h1>
 
 <p align="center">
-  <strong>Keep Codex on the job you gave it.</strong><br>
+  <strong>You asked for one file. Codex split it into six modules, called in three agents, and added SHA-256 checksums. Stop That Shit.</strong><br>
+  Stop That Shit runs locally and blocks unneeded scope, subagents, dependencies, and hashes in Codex tasks.<br>
   <a href="#install-in-two-commands">Install</a> ·
   <a href="#bad-case--good-case">Bad / Good Case</a> ·
   <a href="cases/README.md">Cases</a> ·
@@ -13,10 +14,8 @@
   <a href="README_CN.md">中文</a>
 </p>
 
-You give Codex a small task. It launches several subagents: one inspects the
-code, another reviews the result, and the main agent summarizes everything
-again. It generates a SHA-256 checksum without a consumer. You ask it to review
-a diff; after finding a bug, it starts editing.
+Ask Codex for one small file and you may get a module tree, several subagents,
+a new dependency, and a SHA-256 checksum nobody uses.
 
 Every step comes with a careful explanation. The requested work is still not
 finished, and a noticeable part of the token budget went to work Codex invented

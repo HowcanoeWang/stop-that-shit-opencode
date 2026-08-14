@@ -3,6 +3,8 @@
 const { parseContractPrompt } = require('./contracts.cjs');
 const { assertControlEvent } = require('./control-protocol.cjs');
 const { decide } = require('./decision.cjs');
+const { readRuntime, recordDecision } = require('./runtime-audit.cjs');
+const { recordAnnotation } = require('./runtime-annotations.cjs');
 const { readState, writeState } = require('./state.cjs');
 
 function none() {
@@ -34,16 +36,93 @@ function contractContext(contract, phase = 'active') {
   ].join(' ');
 }
 
-function decisionMessage(result) {
-  return `Stop That Shit [${result.family}/${result.reasonCode}]: ${result.explanation} ${result.nextStep}`;
+const FAMILY_NAMES = { I: 'INTENT', H: 'HASH', S: 'SCOPE', T: 'THRASH' };
+
+function activeControlState(contract) {
+  if (contract.level === 'off') return 'OFF';
+  return contract.level === 'watch' ? 'OBSERVING' : 'ARMED';
+}
+
+function decisionMessage(result, contract, event, responseOutcome) {
+  const observing = responseOutcome === 'context_returned';
+  const lines = [
+    `${observing ? 'WATCH' : 'STOP'} / ${FAMILY_NAMES[result.family] || result.family || 'CONTROL'}`,
+    observing
+      ? 'Guard returned context; it did not deny the action.'
+      : 'Guard returned permission deny.',
+    `Reason: ${result.reasonCode}`,
+    `Code: ${result.family}/${result.reasonCode}`,
+    `State: ${activeControlState(contract)} / ${contract.mode}`
+  ];
+  if (event) lines.push(`Event: ${event.eventId}`);
+  if (result.nextStep) lines.push(`Next: ${result.nextStep}`);
+  return lines.join('\n');
+}
+
+function runtimeCommand(prompt) {
+  const match = /^\s*\$stop-that-shit\s+(status|runtime(?:\s+all)?|explain\s+(evt_[0-9a-f-]+)|label\s+(evt_[0-9a-f-]+)\s+(correct|incorrect|inconclusive))\s*$/i.exec(prompt);
+  if (!match) return null;
+  const words = match[1].toLowerCase().split(/\s+/);
+  return { name: words[0], all: words[1] === 'all', eventId: match[2] || match[3] || null, label: match[4] || null };
+}
+
+function runtimeSummaryText(runtime) {
+  const { summary } = runtime;
+  const labels = summary.labels;
+  return [
+    'Stop That Shit runtime (host effect remains unobserved)',
+    `Checked actions: ${summary.checkedActions}`,
+    `Context responses: ${summary.contextResponses}`,
+    `Permission-deny responses: ${summary.permissionDenyResponses}`,
+    `Labels: correct=${labels.correct}; incorrect=${labels.incorrect}; inconclusive=${labels.inconclusive}`,
+    `Damaged records ignored: ${summary.damagedRecords}`
+  ].join('\n');
+}
+
+function handleRuntimeCommand(command, event, state, options) {
+  if (command.name === 'status') {
+    return context([
+      'Stop That Shit status',
+      `State: ${activeControlState(state.contract)} / ${state.contract.mode}`,
+      'Host effect: unobserved',
+      'Use runtime for checked-action and Guard-response counts.'
+    ].join('\n'));
+  }
+  if (command.name === 'runtime') {
+    const query = command.all ? {} : { sessionId: event.sessionId };
+    return context(runtimeSummaryText(readRuntime(query, options)));
+  }
+  const runtime = readRuntime({ eventId: command.eventId }, options);
+  if (runtime.events.length === 0) return context(`Stop That Shit runtime event not found: ${command.eventId}`);
+  if (command.name === 'label') {
+    const annotation = recordAnnotation(command.eventId, command.label, options);
+    return context(annotation
+      ? `Stop That Shit label recorded: ${command.eventId} = ${command.label}`
+      : `Stop That Shit could not record label for ${command.eventId}.`);
+  }
+  const found = runtime.events[0];
+  return context([
+    `Stop That Shit event ${found.eventId}`,
+    `State: ${found.controlState.toUpperCase()} / ${found.contract.mode}`,
+    `Action: ${found.action.toolName} (${found.action.mutability}); paths=${found.action.pathCount}`,
+    `Decision: ${found.decision.policyOutcome} / ${found.decision.reasonCode}`,
+    `Response: ${found.decision.responseOutcome}`,
+    `Host effect: ${found.decision.hostEffect}`,
+    `Label: ${found.label || 'unlabeled'}`
+  ].join('\n'));
 }
 
 function handlePrompt(event, options) {
   const state = readState(event.sessionId, options.dataDir);
+  const command = runtimeCommand(event.prompt);
+  if (command) return handleRuntimeCommand(command, event, state, options);
   const parsed = parseContractPrompt(event.prompt, state.contract);
   state.contract = parsed.contract;
+  const promptContext = contractContext(state.contract);
+  const repeatedContext = state.lastPromptContext === promptContext;
+  state.lastPromptContext = promptContext;
   writeState(event.sessionId, state, options.dataDir);
-  return context(contractContext(state.contract));
+  return repeatedContext ? none() : context(promptContext);
 }
 
 function handleBeforeAction(event, options) {
@@ -63,11 +142,22 @@ function handleBeforeAction(event, options) {
     writeState(event.sessionId, state, options.dataDir);
   }
 
-  if (result.outcome === 'deny_and_explain' || result.outcome === 'require_user_approval') {
-    return { kind: 'deny', decision: result, message: decisionMessage(result) };
+  const responseOutcome = result.outcome === 'deny_and_explain' || result.outcome === 'require_user_approval'
+    ? 'permission_deny_returned'
+    : result.outcome === 'report_and_defer' ? 'context_returned' : 'none';
+  const auditEvent = recordDecision({
+    sessionId: event.sessionId,
+    action: event.action,
+    contract: state.contract,
+    decision: result,
+    responseOutcome
+  }, options);
+
+  if (responseOutcome === 'permission_deny_returned') {
+    return { kind: 'deny', decision: result, eventId: auditEvent && auditEvent.eventId, message: decisionMessage(result, state.contract, auditEvent, responseOutcome) };
   }
-  if (result.outcome === 'report_and_defer') {
-    return context(decisionMessage(result));
+  if (responseOutcome === 'context_returned') {
+    return context(decisionMessage(result, state.contract, auditEvent, responseOutcome));
   }
   return none();
 }

@@ -6,6 +6,8 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const { handleHook } = require('../src/hook-policy.cjs');
+const { readState } = require('../src/state.cjs');
+const { readRuntime } = require('../src/runtime-audit.cjs');
 
 function workspace(t) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sts-test-'));
@@ -135,4 +137,48 @@ test('watch level warns but does not deny mutation', (t) => {
   const output = handleHook(pre('watch-session', 'apply_patch', { command: 'patch' }), options);
   assert.equal(output.hookSpecificOutput.permissionDecision, undefined);
   assert.match(output.hookSpecificOutput.additionalContext, /MODE_FORBIDS_MUTATION/);
+});
+
+test('unchanged prompt context is emitted once per contract state', (t) => {
+  const options = workspace(t);
+
+  const first = handleHook(prompt('context-session', 'Inspect the current behavior.'), options);
+  const repeated = handleHook(prompt('context-session', 'Continue the inspection.'), options);
+  const changed = handleHook(prompt('context-session', '$stop-that-shit review -- inspect only'), options);
+  const repeatedReview = handleHook(prompt('context-session', 'Continue the review.'), options);
+
+  assert.match(first.hookSpecificOutput.additionalContext, /watch-only mode/);
+  assert.equal(repeated, null);
+  assert.match(changed.hookSpecificOutput.additionalContext, /mode=review/);
+  assert.equal(repeatedReview, null);
+});
+
+test('default sessions are observing and record checks without returning deny', (t) => {
+  const options = workspace(t);
+  const output = handleHook(pre('observe-session', 'apply_patch', { command: 'patch' }), options);
+  assert.equal(output, null);
+  const runtime = readRuntime({ sessionId: 'observe-session' }, options);
+  assert.equal(runtime.summary.checkedActions, 1);
+  assert.equal(runtime.events[0].controlState, 'observing');
+  assert.equal(runtime.events[0].decision.responseOutcome, 'none');
+});
+
+test('status, runtime, explain, and label commands do not mutate the active contract', (t) => {
+  const options = workspace(t);
+  handleHook(prompt('query-session', '$stop-that-shit review -- inspect only'), options);
+  const denied = handleHook(pre('query-session', 'apply_patch', { command: 'patch' }), options);
+  const eventId = denied.hookSpecificOutput.permissionDecisionReason.match(/evt_[0-9a-f-]+/)[0];
+  const before = readState('query-session', options.dataDir).contract;
+
+  const status = handleHook(prompt('query-session', '$stop-that-shit status'), options);
+  const runtime = handleHook(prompt('query-session', '$stop-that-shit runtime'), options);
+  const explain = handleHook(prompt('query-session', `$stop-that-shit explain ${eventId}`), options);
+  const label = handleHook(prompt('query-session', `$stop-that-shit label ${eventId} correct`), options);
+
+  assert.match(status.hookSpecificOutput.additionalContext, /ARMED \/ review/);
+  assert.match(runtime.hookSpecificOutput.additionalContext, /checked actions: 1/i);
+  assert.match(explain.hookSpecificOutput.additionalContext, new RegExp(eventId));
+  assert.match(label.hookSpecificOutput.additionalContext, /correct/);
+  assert.deepEqual(readState('query-session', options.dataDir).contract, before);
+  assert.equal(readRuntime({ eventId }, options).events[0].label, 'correct');
 });

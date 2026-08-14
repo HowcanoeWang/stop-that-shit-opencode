@@ -8,7 +8,6 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const manifestPath = path.join(root, 'release-files.json');
 const releaseManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-const expectedVersion = '0.0.1';
 const failures = [];
 
 function fail(message) {
@@ -46,8 +45,10 @@ for (const entry of releaseManifest.include) {
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const pluginJson = JSON.parse(fs.readFileSync(path.join(root, '.codex-plugin', 'plugin.json'), 'utf8'));
-if (packageJson.version !== expectedVersion) fail(`package version is ${packageJson.version}`);
-if (pluginJson.version !== expectedVersion) fail(`plugin version is ${pluginJson.version}`);
+const expectedVersion = packageJson.version;
+if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(expectedVersion)) {
+  fail(`package version is not semver: ${expectedVersion}`);
+}
 if (packageJson.version !== pluginJson.version) fail('package and plugin versions differ');
 
 const selectedFiles = releaseManifest.include.flatMap((entry) => walk(path.join(root, entry)));

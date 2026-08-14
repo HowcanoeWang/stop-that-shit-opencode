@@ -31,6 +31,27 @@ The default is three repetitions:
 8 cases x 3 arms x 3 runs = 72 isolated Codex sessions
 ```
 
+Each family is a validated `CaseBundle v1`:
+
+```text
+evals/codex-paired/cases/<family>/
+  case.json
+  fixtures/bad/
+  fixtures/good/
+```
+
+A publishable bundle requires a sanitized task, minimal fixtures, one Bad Case,
+the nearest Good Case with one decisive fact changed, deterministic acceptance,
+and a confirmed privacy review. Create and validate bundles with:
+
+```powershell
+npm run sts -- case new --id <slug>
+npm run sts -- case validate evals/codex-paired/cases/<slug>
+```
+
+Validation checks structure and containment; it does not certify fixture code as
+safe. Read external bundles before running their acceptance commands.
+
 ## Inspect the plan
 
 This command does not start Codex or create run artifacts:
@@ -44,6 +65,7 @@ Filter by family or arm while developing:
 ```powershell
 npm run eval:paired -- --dry-run --runs 1 --case intent
 npm run eval:paired -- --dry-run --runs 1 --case hash --arm plugin
+npm run eval:paired -- --case-dir C:\path\to\case-bundle --dry-run
 ```
 
 ## Run live sessions
@@ -78,8 +100,25 @@ plugin. The runner refuses a profile with another enabled plugin.
 Start paid sessions only with `--run`:
 
 ```powershell
-npm run eval:paired -- --run --runs 1 --case intent
-npm run eval:paired -- --run --model gpt-5.6-luna
+npm run eval:paired -- --run --runs 1 --case intent --model gpt-5.6-luna --reasoning medium --max-cells 6
+npm run eval:paired -- --run --model gpt-5.6-luna --reasoning medium --max-cells 72
+```
+
+Live runs require explicit `--model`, `--reasoning`, and `--max-cells` values.
+The runner refuses a selected matrix above that hard paid-session cap. Remember
+that `--case intent` selects both `intent-bad` and `intent-good`: three arms and
+three repeats therefore select 18 cells, not 9. Inspect the dry-run plan before
+spending. Result bundles also record the Codex version, plugin version and Git
+revision, OS, architecture, and sandbox. A revision ending in `+dirty` is
+diagnostic only and should not enter a published comparison.
+
+The default sandbox is `workspace-write`. If Windows cannot initialize that
+sandbox, `--danger-full-access` is an explicit opt-in for disposable evaluation
+fixtures only. It grants the spawned Codex session unsandboxed machine access;
+use it only with reviewed local fixtures and an external temporary workspace:
+
+```powershell
+npm run eval:paired -- --run --runs 1 --case intent --model gpt-5.6-luna --reasoning medium --max-cells 6 --danger-full-access
 ```
 
 You may pass the profile with `--codex-home` instead of the environment
@@ -96,10 +135,25 @@ The runner does not use `--dangerously-bypass-hook-trust`. Each cell receives a
 fresh Git fixture and an ephemeral Codex session.
 
 Runs are sequential. Codex executes in the external workspace root. After each
-cell, the runner archives raw events, stderr, the final workspace, and a scored
-`result.json` under `evals/codex-paired/runs/`, then removes the external cell
-workspace. The archive directory is ignored by Git. Review generated artifacts
-for private paths and task content before sharing them.
+cell, the runner archives raw events, stderr, the final workspace, metadata-only
+runtime events, and a scored `result.json` under `evals/codex-paired/runs/`, then
+removes the external cell workspace. The archive directory is ignored by Git.
+Review generated artifacts for private paths and task content before sharing
+them.
+
+Acceptance can be recomputed from an archived run without starting Codex.
+Treat a result bundle as untrusted input: it can contain executable `command`
+acceptance checks. Review the local bundle before allowing those checks, and do
+not rescore a downloaded bundle merely because the operation does not call a
+model.
+
+```powershell
+npm run eval:paired -- --rescore evals/codex-paired/runs/<stamp> --allow-acceptance-commands
+```
+
+Bundles without command checks do not need the opt-in. Rescore validates cell
+coordinates and workspace-relative paths before rewriting `result.json` and
+`summary.json`.
 
 ## Scoring
 
@@ -111,9 +165,13 @@ Every case has executable acceptance checks. The checks cover:
 - an exact dependency authorization;
 - a checksum that matches its source file.
 
-The summary reports acceptance passes and observed Hook blocks by arm and case
-kind. A blocked action is not a win when the task is incomplete. A smaller diff
-is not a win when the Good Case fails.
+The summary reports completed and passed cells, infrastructure exclusions,
+runtime checked/context/permission-deny response counts, and paired
+baseline-to-plugin outcomes: `improved`, `regressed`, `unchanged`, or
+`incomparable`. Infrastructure failures do not enter the effect denominator.
+A permission-deny response is not a win when the task is incomplete, and its
+host effect remains `unobserved`. A smaller diff is not a win when the Good Case
+fails.
 
 ## Claim gate
 

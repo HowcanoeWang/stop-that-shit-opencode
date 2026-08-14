@@ -63,6 +63,25 @@ function extractAffectedPaths(toolName, toolInput, cwd) {
   return [...new Set(paths.filter(Boolean))];
 }
 
+function addedLinesByPatchedFile(text) {
+  const sections = [];
+  let current = null;
+  for (const line of String(text || '').split(/\r?\n/)) {
+    const header = /^\*\*\* (?:Add|Update) File:\s*(.+?)\s*$/.exec(line);
+    if (header) {
+      current = { path: normalizePath(header[1]), added: [] };
+      sections.push(current);
+      continue;
+    }
+    if (/^\*\*\*/.test(line)) {
+      current = null;
+      continue;
+    }
+    if (current && /^\+(?!\+\+)/.test(line)) current.added.push(line);
+  }
+  return sections;
+}
+
 function detectDependencyIntent(toolName, toolInput) {
   const name = String(toolName || '');
   const text = inputText(toolInput);
@@ -70,10 +89,11 @@ function detectDependencyIntent(toolName, toolInput) {
     return DEPENDENCY_COMMAND.test(text);
   }
   if (name === 'apply_patch') {
-    const paths = extractAffectedPaths(name, toolInput);
-    const manifest = paths.some((path) => /(?:^|\/)(?:package\.json|pyproject\.toml|requirements[^/]*\.txt|Cargo\.toml|go\.mod|composer\.json|Gemfile)$/i.test(path));
-    const added = text.split(/\r?\n/).filter((line) => /^\+(?!\+\+)/.test(line)).join('\n');
-    return manifest && /["']?(?:dependencies|devDependencies|optionalDependencies)["']?\s*[:=]|^[+]\s*[^#\s][^\r\n]*(?:==|>=|~=|\^\d)/mi.test(added);
+    const manifest = /(?:^|\/)(?:package\.json|pyproject\.toml|requirements[^/]*\.txt|Cargo\.toml|go\.mod|composer\.json|Gemfile)$/i;
+    const dependencyDeclaration = /["']?(?:dependencies|devDependencies|optionalDependencies)["']?\s*[:=]|^[+]\s*[^#\s][^\r\n]*(?:==|>=|~=|\^\d)/mi;
+    return addedLinesByPatchedFile(text).some((section) => (
+      manifest.test(section.path) && dependencyDeclaration.test(section.added.join('\n'))
+    ));
   }
   return false;
 }

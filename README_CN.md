@@ -19,14 +19,17 @@
 
 我也试过在 `AGENTS.md` 里不断补规则：「不要乱改」「别过度设计」「没让我做的先别做」。每被气到一次就补一条，写着写着，`AGENTS.md` 自己也开始造史了。Stop That Shit 把其中少量、能明确判断的边界做成 Skill 和可执行的 Guard。
 
-Stop That Shit 给 Codex 一道任务边界。默认的 Guard 由一个小 Skill 和两个 Hook 事件组成。Codex 仍然可以读仓库，也必须处理真正受影响的调用方。它碰到 Guard 能确认的越界动作时，会收到一枚红章：
+Stop That Shit 为 Codex 划定任务边界。默认的 Guard 由一个小 Skill 和两个 Hook 事件组成。Codex 仍然可以读仓库，也必须处理真正受影响的调用方。它碰到 Guard 能确认的越界动作时，会收到一枚红章：
 
 ```text
 STOP / INTENT
-Review 不等于允许修改。
+Guard 返回 permission deny。
+Reason: MODE_FORBIDS_MUTATION
+State: ARMED / review
+Event: evt_...
 ```
 
-`0.0.1` 是技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界多做，但都不能保证模型每次听话。
+`0.0.2` 是技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界行为，但都不能保证模型每次听话。
 
 | 从哪里开始 | 提供什么 | 使用成本 |
 | --- | --- | --- |
@@ -56,7 +59,7 @@ Codex  提交一个窄补丁，运行受影响的检查。
 STS    ALLOWED：完成请求确实需要这个动作。
 ```
 
-Good Case 和拦截同样重要。已经发布的数据可能需要迁移；发布流程可能真的消费校验和；共享合同变化后可能必须跑跨组件测试。用户或仓库给得出理由，这些工作就该保留。
+Good Case 和拦截同样重要。已经发布的数据可能需要迁移；发布流程可能真的消费校验和；共享合同变化后可能必须跑跨组件测试。只要用户明确要求，或仓库中的代码、数据和发布流程能证明它确实必要，这些工作就该保留。
 
 ## SHIT 是哪四种
 
@@ -83,9 +86,9 @@ Good Case 和拦截同样重要。已经发布的数据可能需要迁移；发�
 
 ## 为什么默认阻止 hash
 
-在 covered tool path 上，Hook 可以较高置信度地识别 hash 动作。它也有一个很具体的判断题：摘要有没有省掉真实工作，结果会不会改变下一步？
+在 Hook 覆盖的工具调用中，它可以较高置信度地识别 hash 动作。判断标准很具体：摘要有没有省掉真实工作，结果会不会改变下一步？
 
-我们沿用 [HERO](https://github.com/wanshuiyin/HERO-Anti-OverDefense) 写下的判据：digest 必须替代一个更贵的操作，而且结果必须控制下一步做什么。
+我们沿用 [HERO](https://github.com/wanshuiyin/HERO-Anti-OverDefense) 写下的判据：摘要必须替代一个更贵的操作，而且结果必须控制下一步做什么。
 
 ```text
 STOP
@@ -95,7 +98,7 @@ ALLOW
 用 digest 跳过一个未变化大文件的重复读取。
 ```
 
-`0.0.1` 默认拒绝可识别的新 hash 操作。用户或仓库给出了真实用途，就用 `hash=allow` 放行。Hook 不会根据自己没读过的代码猜测这个用途。
+`0.0.2` 默认拒绝可识别的新 hash 操作。用户明确要求，或仓库中的代码与发布流程证明它确实必要时，就用 `hash=allow` 放行。Hook 不会根据自己没读过的代码猜测这个用途。
 
 ## 怎么用
 
@@ -116,6 +119,19 @@ $stop-that-shit change agents=1 -- 使用一个独立测试 subagent。
 ```
 
 不知道全部受影响文件时，不要硬写 `files=`。让 Codex 沿真实调用链检查，把完成任务必需的 caller、fixture 和测试一起改完。
+
+安装后默认是 `OBSERVING / unconfirmed`：Guard 会检查并记录 covered action，但不会猜测任务授权，也不会返回 permission deny。显式使用 `review`、`answer`、`monitor` 或 `change` 后才进入 `ARMED`；`watch` 始终只观察。
+
+下面这些只读命令不会修改当前任务合同：
+
+```text
+$stop-that-shit status
+$stop-that-shit runtime
+$stop-that-shit explain evt_...
+$stop-that-shit label evt_... correct|incorrect|inconclusive
+```
+
+`permission_deny_returned` 只表示 Guard 返回了拒绝响应，不证明宿主最终没有执行动作。Stop That Shit 始终把 host effect 标为 `unobserved`。
 
 ## Guard 现在能拦什么
 
@@ -140,7 +156,7 @@ Hook 必须收到受支持的事件和足够的输入才能判断。它不会看
 
 Skill 负责语义判断。Hook 在受支持的工具运行前检查明确事实。Codex Adapter 把宿主事件翻译成核心决策接口。
 
-`0.0.1` 只实现了 Codex Adapter。其他 harness 需要提供等价的 before-action 事件，才能复用同一套核心。接口说明见 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md)。
+`0.0.2` 只实现了 Codex Adapter。其他 harness 需要提供等价的 before-action 事件，才能复用同一套核心。接口说明见 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md)。
 
 ## 局限和证据
 
@@ -168,7 +184,7 @@ codex plugin add stop-that-shit@stop-that-shit
 不想启用命令 Hook 时，让 Codex 内置的 Skill Installer 只安装 Skill：
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
 ```
 
 新开任务后调用 `$stop-that-shit`。这条路径不需要 Hook 信任，但不能机器拦截越界动作，也不会改变 Codex 原有的 sandbox 和 approval 设置。
@@ -186,13 +202,13 @@ paired 命令默认只打印 72 个 cell 的计划，不会调用模型。真实
 
 ## 一起划清边界
 
-这个项目不靠不断增加禁令成长，而是靠成对案例推进：
+这个项目靠成对案例推进：
 
 ```text
 报告 -> 反例 -> 复现 -> 执行约束
 ```
 
-只完成第一步也有价值。不需要会写 Hook，也不需要先做完整 benchmark。只有证据可复现、判断足够可靠时，规则才进入 Guard。
+只完成第一步也有价值。不需要会写 Hook，也不需要先做完整 benchmark。
 
 - Codex 做了请求不需要的工作？[提交 Bad Case](https://github.com/lennney/stop-that-shit/issues/new?template=bad-case.yml)。
 - 某条规则会拦住真正必要的工作？[提交 Good Case](https://github.com/lennney/stop-that-shit/issues/new?template=good-case.yml)。

@@ -8,6 +8,7 @@ const test = require('node:test');
 const { toControlEvent, fromControlResult } = require('../src/adapters/codex-hooks.cjs');
 const { assertControlEvent, PROTOCOL_VERSION } = require('../src/control-protocol.cjs');
 const { handleControlEvent } = require('../src/controller.cjs');
+const { detectDependencyIntent } = require('../src/adapters/codex-tool-classifier.cjs');
 
 function dataDir(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'sts-protocol-'));
@@ -57,6 +58,26 @@ test('Codex Adapter extracts a patch path without guessing its semantics', () =>
   assert.equal(event.action.dependencyIntent, false);
 });
 
+test('dependency intent is scoped to added lines in manifest sections', () => {
+  const unrelated = `*** Begin Patch
+*** Update File: package.json
+@@
+-  "description": "old"
++  "description": "new"
+*** Update File: src/report.cjs
+@@
++const dependencies = { status: 'reported' };
+*** End Patch`;
+  assert.equal(detectDependencyIntent('apply_patch', { patch: unrelated }), false);
+
+  const dependency = `*** Begin Patch
+*** Update File: package.json
+@@
++  "dependencies": { "example": "^1.0.0" }
+*** End Patch`;
+  assert.equal(detectDependencyIntent('apply_patch', { patch: dependency }), true);
+});
+
 test('Codex Adapter normalizes an absolute patch path relative to hook cwd', () => {
   const cwd = process.platform === 'win32' ? 'D:\\fixture' : '/fixture';
   const absolute = process.platform === 'win32' ? 'D:\\fixture\\src\\config.cjs' : '/fixture/src/config.cjs';
@@ -89,7 +110,12 @@ test('controller decisions do not depend on model metadata', (t) => {
   };
   const first = handleControlEvent({ ...action, host: { family: 'codex', model: 'gpt-a' } }, { dataDir: firstDir });
   const second = handleControlEvent({ ...action, host: { family: 'future-host', model: 'model-b' } }, { dataDir: secondDir });
-  assert.deepEqual(first, second);
+  assert.deepEqual(first.decision, second.decision);
+  assert.equal(first.kind, second.kind);
+  assert.match(first.eventId, /^evt_/);
+  assert.match(second.eventId, /^evt_/);
+  assert.notEqual(first.eventId, second.eventId);
+  assert.equal(first.message.replace(first.eventId, '<event>'), second.message.replace(second.eventId, '<event>'));
   assert.equal(first.kind, 'deny');
 });
 

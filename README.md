@@ -33,10 +33,13 @@ it gets a red stamp:
 
 ```text
 STOP / INTENT
-Review does not authorize mutation.
+Guard returned permission deny.
+Reason: MODE_FORBIDS_MUTATION
+State: ARMED / review
+Event: evt_...
 ```
 
-Version `0.0.1` is a technical preview. LLM runs vary, and Hooks see only part
+Version `0.0.2` is a technical preview. LLM runs vary, and Hooks see only part
 of a Codex run. The Skill and Guard can reduce some unwanted work. Neither can
 guarantee how the model will behave.
 
@@ -121,7 +124,7 @@ ALLOW
 Use a digest to skip rereading an unchanged large file.
 ```
 
-`0.0.1` denies a recognized new hash operation by default. Use `hash=allow`
+`0.0.2` denies a recognized new hash operation by default. Use `hash=allow`
 when the user or the repository supplies the missing job. The Hook does not try
 to infer that job from code it has not seen.
 
@@ -146,6 +149,23 @@ $stop-that-shit change agents=1 -- Use one independent test shard.
 Skip `files=` when you do not know every affected file. Codex should inspect the
 real call path and update the callers, fixtures, or tests needed to finish the
 request.
+
+Installation begins in `OBSERVING / unconfirmed`: covered actions are checked
+and recorded, but the Guard does not infer authorization or return permission
+deny. `review`, `answer`, `monitor`, or `change` explicitly arm it; `watch`
+keeps observation-only behavior.
+
+Inspect the local evidence chain without changing the current task contract:
+
+```text
+$stop-that-shit status
+$stop-that-shit runtime
+$stop-that-shit explain evt_...
+$stop-that-shit label evt_... correct|incorrect|inconclusive
+```
+
+`permission_deny_returned` describes the Guard response, not a proven host
+effect. Stop That Shit reports host effect as `unobserved`.
 
 ## What the Guard stops
 
@@ -175,7 +195,7 @@ The Skill guides semantic choices. The Hook enforces explicit facts before a
 supported tool runs. A small host Adapter translates Codex events into the core
 decision interface.
 
-Codex is the only implemented Adapter in `0.0.1`. Another harness can use the
+Codex is the only implemented Adapter in `0.0.2`. Another harness can use the
 same core when it provides an equivalent before-action event. See
 [HOST-ADAPTER-CONTRACT.md](HOST-ADAPTER-CONTRACT.md).
 
@@ -212,7 +232,7 @@ message, use the CLI TUI for this review, then restart Desktop.
 If you do not want command Hooks, install only the advisory Skill:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
 ```
 
 Start a new task, then invoke `$stop-that-shit`. This path needs no Hook trust,

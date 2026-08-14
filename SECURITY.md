@@ -7,7 +7,7 @@ untrusted Hook definitions, host bugs, or direct user actions may bypass it.
 
 ## Supported version
 
-`0.0.1` is a pre-release. Security and compatibility support are best effort
+`0.0.2` is a pre-release. Security and compatibility support are best effort
 until the first stable release.
 
 ## Reporting a vulnerability

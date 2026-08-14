@@ -43,6 +43,19 @@ $stop-that-shit change -- Fix the failing config test.
 $stop-that-shit review -- Review this diff. Report findings; do not edit.
 ```
 
+An installed Guard begins in observation-only `unconfirmed` mode. Do not claim
+that an action was blocked unless an explicit mode armed the Guard and the Guard
+returned permission deny. Even then, describe the host effect as unobserved.
+
+The following inspection commands do not change the current task contract:
+
+```text
+$stop-that-shit status
+$stop-that-shit runtime
+$stop-that-shit explain evt_...
+$stop-that-shit label evt_... correct|incorrect|inconclusive
+```
+
 Use a hard file lock only when the complete boundary is already known:
 
 ```text

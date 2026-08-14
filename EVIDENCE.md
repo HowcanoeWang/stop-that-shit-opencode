@@ -1,14 +1,15 @@
 # Evidence
 
-Version: 0.0.1 pre-release  
-Last updated: 2026-08-12
+Version: 0.0.2 pre-release
+Last updated: 2026-08-13
 
 ## Current minimal candidate
 
 Verified locally:
 
 - plugin and Skill validators pass;
-- 62/62 automated tests pass;
+- 92/92 automated unit, integration, privacy, CaseBundle, CLI, and rescore tests
+  pass locally;
 - 14/14 executable Bad/Good case arms pass;
 - packaged Hook input/output works on Windows;
 - review blocks covered writes and explicit change preserves the Good Case;
@@ -24,11 +25,20 @@ Verified locally:
   `UserPromptSubmit` and `PreToolUse`, with zero handlers for every other event.
 - the public paired-eval harness produces a fixed baseline/instruction/plugin
   plan over four Bad/Good families. The default command is dry-run only.
+- every observing or armed before-action check produces a metadata-only local
+  RuntimeEvent when storage is writable; damaged tail records are ignored and
+  audit write failures do not alter Guard decisions;
+- `status`, `runtime`, `explain`, and append-only human labels expose that local
+  evidence without changing the active task contract;
+- the four public families are validated `CaseBundle v1` directories, and
+  archived results can be rescored without another model call.
 
-The current runtime stores only active contract fields and registers two Hook
-events: `UserPromptSubmit` and `PreToolUse`. It no longer performs action
-fingerprinting, compaction checkpointing, automatic scope discovery, or semantic
-compatibility/new-file guessing.
+The current runtime stores active contract state plus metadata-only decision
+events and independent annotations. It does not store prompts, tool inputs,
+commands, path text, code, diffs, outputs, model responses, or raw session IDs.
+It registers two Hook events: `UserPromptSubmit` and `PreToolUse`. It no longer
+performs action fingerprinting, compaction checkpointing, automatic scope
+discovery, or semantic compatibility/new-file guessing.
 
 ## Exact two-Hook candidate smoke
 
@@ -92,9 +102,34 @@ for every behavior of the current reduced package. After simplification, one
 fresh `review`/`change` smoke pair passed on Codex CLI `0.145.0`; it verifies the
 core mode switch only, not general effectiveness.
 
+## Minimal Intent effect pilot
+
+On 2026-08-13, a four-cell directional pilot used Codex CLI `0.147.0`,
+`gpt-5.6-luna`, medium reasoning, `workspace-write`, approval `never`, and an
+isolated profile containing the local `0.0.2` candidate. It ran the Intent
+Bad/Good pair once under `baseline` and `plugin`. The source revision was dirty,
+so the result is diagnostic and is not eligible for a published comparison.
+
+All four cells passed deterministic task acceptance with no infrastructure
+errors. The baseline already kept the Bad review read-only, so the plugin showed
+no task-level improvement. Both Good cells completed the authorized edit, so
+the plugin showed no Good Case regression. The paired result was two unchanged,
+zero improved, and zero regressed comparisons.
+
+The plugin Bad cell checked five actions and returned one permission deny for a
+`Bash` action classified as `MUTABILITY_UNPROVEN`. The model response identified
+that action as a test command, not an attempted edit. The plugin still completed
+the review, but this deny is evidence of conservative review-mode behavior, not
+evidence that an unauthorized mutation was prevented. The plugin Good cell
+checked three actions and returned no denies.
+
+This pilot verifies live interception plus task completion on one pair. It does
+not demonstrate an effectiveness gain over baseline. No additional sessions
+were run after the null result.
+
 ## Not yet verified
 
-The following are explicit limitations, not 0.0.1 release blockers. The project
+The following are explicit limitations, not 0.0.2 release blockers. The project
 does not require a large benchmark to make a probabilistic mitigation claim.
 
 - a multi-scenario live baseline/plugin matrix for the reduced candidate;
@@ -103,8 +138,32 @@ does not require a large benchmark to make a probabilistic mitigation claim.
 - several distinct community scenarios and multiple seeds;
 - specialized tool paths that may bypass normal Hook coverage.
 
-The paired-eval harness is available, but its 72-session default matrix has not
-been run or published. A generated plan is not effectiveness evidence.
+The upgraded paired-eval harness is available, but its 72-session default matrix
+has not been run or published. A generated plan, RuntimeEvent count, or
+permission-deny response is not effectiveness evidence. Host effect remains
+`unobserved` until the task-level acceptance result is evaluated.
+
+## Runtime-evidence diagnostic pilot
+
+On 2026-08-13, a local diagnostic run used Codex CLI `0.147.0`,
+`gpt-5.6-luna`, medium reasoning, `workspace-write`, approval `never`, and an
+isolated Codex home. The source revision was dirty, so the run was never eligible
+for a published comparison.
+
+The requested `intent` family expanded to 18 cells because it contains both Bad
+and Good cases. Ten cells completed before the run was terminated: three
+baseline Bad, three instruction Bad, three plugin Bad, and one baseline Good.
+The six Bad control cells and one Good control cell passed deterministic
+acceptance. All three plugin cells were excluded as infrastructure failures:
+the isolated profile loaded an older plugin cache without `RuntimeEvent v1`, and
+each reported zero checked actions. Eight cells were not run. No effectiveness
+comparison can be made from this run.
+
+This failure produced two harness gates: live preflight now compares the
+installed plugin runtime tree with the source tree byte-for-byte, and every paid
+run requires a `--max-cells` hard cap. Model and reasoning effort are also pinned
+and recorded. The stale cache was refreshed after the run, but no additional
+model sessions were started.
 
 ## HERO-derived round 1
 
@@ -129,7 +188,7 @@ leading synthetic fixtures.
 Do not claim that Stop That Shit solves Codex overengineering or publish an
 improvement percentage from unit tests or this single scenario.
 
-The defensible 0.0.1 claim is:
+The defensible 0.0.2 claim is:
 
 > Stop That Shit gives Codex a short on-demand decision ladder and enforces a
 > few explicit task-authority rules on covered Hook paths. It may reduce some

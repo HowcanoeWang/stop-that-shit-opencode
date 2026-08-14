@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.2 — pre-release
+
+- Added `OFF`, `OBSERVING`, and `ARMED` control states with distinct context and
+  permission-deny response outcomes; host effect is never inferred.
+- Added local metadata-only `RuntimeEvent v1` logs, append-only annotations, and
+  `doctor`, `runtime`, `explain`, and `label` inspection commands.
+- Migrated paired fixtures to validated `CaseBundle v1` directories and added
+  isolated runtime counts, infrastructure exclusions, paired outcome summaries,
+  external case directories, and offline rescore.
+- Added live-eval preflight for exact installed runtime-tree parity, pinned model
+  and reasoning metadata, explicit infrastructure exclusions, and a required
+  `--max-cells` paid-session cap after a stale-cache diagnostic run.
+- Added JSON Schema validation with a generated standalone validator; Ajv remains
+  a development dependency and is not loaded by the plugin runtime.
+
 ## 0.0.1 — pre-release
 
 - Added the four-question Stop Ladder.

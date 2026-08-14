@@ -1,6 +1,6 @@
 {
   "name": "stop-that-shit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Keep Codex on task by preserving task mode, scope, and execution state.",
   "author": {
     "name": "Stop That Shit contributors",

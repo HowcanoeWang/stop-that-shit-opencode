@@ -21,7 +21,8 @@ function statePath(sessionId, override) {
 function freshState() {
   return {
     schemaVersion: 1,
-    contract: defaultContract()
+    contract: defaultContract(),
+    lastPromptContext: null
   };
 }
 
@@ -55,6 +56,7 @@ function writeState(sessionId, state, override) {
 }
 
 module.exports = {
+  dataRoot,
   freshState,
   readState,
   sessionKey,

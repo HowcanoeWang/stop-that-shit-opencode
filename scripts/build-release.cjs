@@ -7,7 +7,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const distRoot = path.join(root, 'dist');
-const target = path.join(distRoot, 'stop-that-shit-0.0.1');
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const target = path.join(distRoot, `stop-that-shit-${packageJson.version}`);
 const releaseManifest = JSON.parse(fs.readFileSync(path.join(root, 'release-files.json'), 'utf8'));
 
 if (path.dirname(target) !== distRoot || !target.startsWith(`${distRoot}${path.sep}`)) {

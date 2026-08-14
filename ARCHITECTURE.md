@@ -1,14 +1,14 @@
 # Architecture
 
-Stop That Shit 0.0.1 has one deep module: given the current task contract and a
-covered proposed action, return `allow`, `ask`, `stop`, or guidance.
+Stop That Shit 0.0.2 has two narrow deep modules: a host-independent control
+decision and a metadata-only runtime evidence sidecar.
 
 ```text
 Codex Hook JSON
     -> Codex Adapter
     -> ControlEvent v1
     -> decision(contract, action)
-    -> Codex Hook response
+    -> Codex Hook response + RuntimeEvent v1
 ```
 
 - `src/decision.cjs` contains host-independent decisions.
@@ -16,10 +16,26 @@ Codex Hook JSON
 - `src/controller.cjs` stores the current contract and applies decisions.
 - `src/adapters/codex-*.cjs` classify Codex events and render Hook responses.
 - `src/state.cjs` stores only per-session contract state.
+- `src/runtime-audit.cjs` appends and reads metadata-only decision events.
+- `src/runtime-annotations.cjs` appends independent human labels.
 
-The runtime subscribes to four lifecycle points: session start, user prompt,
-before tool use, and subagent start. It does not track every completed action,
-build a dependency graph, restore semantic checkpoints, or judge code quality.
+The packaged Codex manifest subscribes to two events: user prompt and before
+tool use. It does not add a `SubagentStart` Hook, track completed actions, build
+a dependency graph, restore semantic checkpoints, or judge code quality.
+
+Control state and observed response are deliberately separate:
+
+```text
+OFF        no checks and no normal-action events
+OBSERVING  check and record; never return permission deny
+ARMED      explicit task contract; may return permission deny
+
+response: none | context_returned | permission_deny_returned
+host effect: unobserved
+```
+
+Installation defaults to `OBSERVING / unconfirmed`. An explicit task mode arms
+the Guard; `watch` stays observing and `off` stops normal-action recording.
 
 Hard decisions are limited to observable facts:
 
@@ -29,5 +45,8 @@ Hard decisions are limited to observable facts:
 - subagent launches beyond `agents=N`;
 - high-confidence hashing without `hash=allow`.
 
-The Skill handles broader semantic judgment through the Stop Ladder. Specialized
-tool paths may bypass Hooks, so this remains a guardrail, not a security sandbox.
+Every observing or armed check is recorded even when the policy allows it, so
+runtime totals retain a real checked-action denominator. Audit write failures
+fail open and never change the control decision. The Skill handles broader
+semantic judgment through the Stop Ladder. Specialized tool paths may bypass
+Hooks, so this remains a guardrail, not a security sandbox.

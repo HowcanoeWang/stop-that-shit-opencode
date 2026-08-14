@@ -1,7 +1,7 @@
 # Install Stop That Shit as an Agent
 
 This file is for a Codex agent that is helping a user install Stop That Shit
-`0.0.1`. Keep the installation narrow. Do not clone the repository, modify the
+`0.0.2`. Keep the installation narrow. Do not clone the repository, modify the
 user's Codex configuration, copy authentication files, or bypass Hook review.
 
 ## Default installation
@@ -55,7 +55,7 @@ general improvement in model behavior.
 If the user does not want Hooks, install the advisory Skill instead:
 
 ```text
-$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.1/skills/stop-that-shit
+$skill-installer Install stop-that-shit from https://github.com/lennney/stop-that-shit/tree/0.0.2/skills/stop-that-shit
 ```
 
 Ask the user to start a new Codex task after installation. Explain that this

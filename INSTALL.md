@@ -1,5 +1,8 @@
 # Install Stop That Shit 0.0.2
 
+The current immutable preview is
+[`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2).
+
 The default installation is the Guard: one Skill plus two Hook events. Install
 Skill only when you prefer advisory guidance without runtime enforcement.
 

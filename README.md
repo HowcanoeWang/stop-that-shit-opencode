@@ -39,7 +39,8 @@ State: ARMED / review
 Event: evt_...
 ```
 
-Version `0.0.2` is a technical preview. LLM runs vary, and Hooks see only part
+Version [`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2)
+is Technical Preview 2. LLM runs vary, and Hooks see only part
 of a Codex run. The Skill and Guard can reduce some unwanted work. Neither can
 guarantee how the model will behave.
 

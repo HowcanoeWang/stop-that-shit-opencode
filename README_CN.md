@@ -29,7 +29,7 @@ State: ARMED / review
 Event: evt_...
 ```
 
-`0.0.2` 是技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界行为，但都不能保证模型每次听话。
+[`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2) 是第二个技术预览版。LLM 每次运行都可能不同，Hook 也看不到 Codex 的全部动作。Skill 和 Guard 可以减少一部分越界行为，但都不能保证模型每次听话。
 
 | 从哪里开始 | 提供什么 | 使用成本 |
 | --- | --- | --- |

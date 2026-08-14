@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.2 — pre-release
+## 0.0.2 — 2026-08-14 (Technical Preview 2)
 
 - Added `OFF`, `OBSERVING`, and `ARMED` control states with distinct context and
   permission-deny response outcomes; host effect is never inferred.

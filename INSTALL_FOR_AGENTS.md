@@ -1,8 +1,10 @@
 # Install Stop That Shit as an Agent
 
 This file is for a Codex agent that is helping a user install Stop That Shit
-`0.0.2`. Keep the installation narrow. Do not clone the repository, modify the
-user's Codex configuration, copy authentication files, or bypass Hook review.
+[`0.0.2`](https://github.com/lennney/stop-that-shit/releases/tag/0.0.2)
+Technical Preview 2. Keep the installation narrow. Do not clone the repository,
+modify the user's Codex configuration, copy authentication files, or bypass
+Hook review.
 
 ## Default installation
 

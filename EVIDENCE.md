@@ -1,9 +1,11 @@
 # Evidence
 
-Version: 0.0.2 pre-release
-Last updated: 2026-08-13
+Version: 0.0.2 Technical Preview 2
+Release: https://github.com/lennney/stop-that-shit/releases/tag/0.0.2
+Tagged commit: `a5c937045e8a8de75e897459e4ba5f6c2cc9ae81`
+Last updated: 2026-08-14
 
-## Current minimal candidate
+## Published technical preview
 
 Verified locally:
 
@@ -32,6 +34,9 @@ Verified locally:
   evidence without changing the active task contract;
 - the four public families are validated `CaseBundle v1` directories, and
   archived results can be rescored without another model call.
+- the tagged commit passed 92/92 automated tests, 14/14 executable policy case
+  arms, the 101-file release allowlist, and an installed-cache Hook smoke before
+  publication.
 
 The current runtime stores active contract state plus metadata-only decision
 events and independent annotations. It does not store prompts, tool inputs,
@@ -59,6 +64,19 @@ completed.
 
 These smoke cells verify the two-Hook package and its no-Hook degradation path.
 They do not show an improvement over baseline.
+
+## Public 0.0.2 install acceptance
+
+The immutable `0.0.2` tag points to commit
+`a5c937045e8a8de75e897459e4ba5f6c2cc9ae81`. The plugin was reinstalled into a
+dedicated Codex profile from that source. The installed plugin reported version
+`0.0.2`, its runtime tree matched the tagged source byte-for-byte, and its
+installed Hook returned `deny / I/MODE_FORBIDS_MUTATION` for `apply_patch` under
+an explicit review contract.
+
+This verifies installation integrity and the covered Hook response. It does not
+prove that the host prevented the action, and it is not an effectiveness result
+against baseline.
 
 ## Public 0.0.1 install acceptance
 

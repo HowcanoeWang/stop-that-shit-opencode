@@ -50,11 +50,12 @@ function resolveCodexInvocation(candidates, options = {}) {
   const platform = options.platform || process.platform;
   const nodePath = options.nodePath || process.execPath;
   const fileExists = options.fileExists || fs.existsSync;
-  const available = candidates.map((value) => path.resolve(value));
+  const pathApi = platform === 'win32' ? path.win32 : path;
+  const available = candidates.map((value) => pathApi.resolve(value));
 
   if (platform === 'win32') {
     for (const candidate of available) {
-      const cli = path.join(path.dirname(candidate), 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
+      const cli = pathApi.join(pathApi.dirname(candidate), 'node_modules', '@openai', 'codex', 'bin', 'codex.js');
       if (fileExists(cli)) return { command: nodePath, argsPrefix: [cli] };
     }
     const executable = available.find((value) => value.toLowerCase().endsWith('.exe'));

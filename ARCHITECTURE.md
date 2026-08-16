@@ -22,10 +22,12 @@ OpenCode hooks -----> OpenCode Adapter --/
 - `src/runtime-annotations.cjs` appends independent human labels.
 
 The packaged Codex manifest keeps its two-event surface. The OpenCode plugin can
-load from a local file or GitHub package and uses `chat.message`,
-`tool.execute.before`, `tool.execute.after`, and session events. It maps child
-sessions to the root contract so a subagent cannot silently replace user
-authority.
+load from a local file or GitHub package and uses only documented hooks:
+`message.part.updated` and session events through `event`, plus
+`tool.execute.before` and `tool.execute.after`. It recovers user messages with
+the SDK `client.session.message` call, injects contract context with
+`client.session.prompt({ noReply: true })`, and maps child sessions to the root
+contract so a subagent cannot silently replace user authority.
 
 Control state and observed response are deliberately separate:
 

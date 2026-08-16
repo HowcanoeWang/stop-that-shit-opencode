@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Added an OpenCode adapter and GitHub-installable plugin entrypoint using
+  `chat.message`, tool execution hooks, and root-session contract inheritance.
+- Added package metadata for
+  `opencode plugin github:HowcanoeWang/stop-that-shit-opencode -g` while keeping
+  npm publication disabled.
+- Added OpenCode-native tool classification, execution-denial audit outcomes,
+  and deterministic adapter/plugin regression tests without changing Codex
+  Hook behavior.
+
 ## 0.0.3 — 2026-08-14 (Technical Preview 3)
 
 - Fixed CI setup so every matrix job installs the declared development

@@ -71,10 +71,10 @@ the non-interactive steps.
 
 ### OpenCode from GitHub
 
-OpenCode 1.18.18 or newer can install this fork globally without cloning it:
+OpenCode 1.18.18 or newer can install this repository globally without cloning it:
 
 ```bash
-opencode plugin github:HowcanoeWang/stop-that-shit-opencode -g
+opencode plugin github:lennney/stop-that-shit -g
 ```
 
 Restart OpenCode and use `$stop-that-shit review -- ...`. The command installs

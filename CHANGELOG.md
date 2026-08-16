@@ -5,8 +5,8 @@
 - Added an OpenCode adapter and GitHub-installable plugin entrypoint using
   `chat.message`, tool execution hooks, and root-session contract inheritance.
 - Added package metadata for
-  `opencode plugin github:HowcanoeWang/stop-that-shit-opencode -g` while keeping
-  npm publication disabled.
+  `opencode plugin github:lennney/stop-that-shit -g` while keeping npm
+  publication disabled.
 - Added OpenCode-native tool classification, execution-denial audit outcomes,
   and deterministic adapter/plugin regression tests without changing Codex
   Hook behavior.

@@ -79,11 +79,11 @@ sessions unless you pass `--run`.
 
 ## OpenCode: install from GitHub
 
-OpenCode 1.18.18 or newer can install this fork directly from GitHub without a
-checkout or npm publication:
+OpenCode 1.18.18 or newer can install this repository directly from GitHub
+without a checkout or npm publication:
 
 ```bash
-opencode plugin github:HowcanoeWang/stop-that-shit-opencode -g
+opencode plugin github:lennney/stop-that-shit -g
 ```
 
 The command installs the package into OpenCode's cache and adds the GitHub spec
@@ -115,7 +115,7 @@ and `hash=ask` therefore stop the action and ask you to submit a new explicit
 
 Contract state and runtime metadata are stored below OpenCode's state directory
 in `stop-that-shit/`. OpenCode currently has no external-plugin uninstall
-subcommand; remove `github:HowcanoeWang/stop-that-shit-opencode` from the global
+subcommand; remove `github:lennney/stop-that-shit` from the global
 configuration's `plugin` list, then restart OpenCode.
 
 ## Optional: Skill only
